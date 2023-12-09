@@ -1,0 +1,138 @@
+{
+  "booksList": [
+    {
+      "bookId": 1,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas VI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id laborum................"
+    },
+    {
+      "bookId": 2,
+      "bookAuthor": "Abdi Aziz",
+      "bookTitle": "Bahasa Inggris Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    },
+    {
+      "bookId": 3,
+      "bookAuthor": "Vivi Hermani",
+      "bookTitle": "Bahasa Pemograman Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Belajaran",
+      "bookRating": 2,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    },
+    {
+      "bookId": 4,
+      "bookAuthor": "Vivi Hermani",
+      "bookTitle": "Bahasa Pemograman Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Belajaran",
+      "bookRating": 2,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    },
+    {
+      "bookId": 5,
+      "bookAuthor": "Vivi Hermani",
+      "bookTitle": "Bahasa Pemograman Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Belajaran",
+      "bookRating": 2,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    }
+
+  ],
+
+  "borrowingHistoryBook": [
+    {
+      "bookId": 1,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas VI",
+      "bookRating": 3,
+      "bookImagePath": "book1.png",
+      "borrowingDate": "28 Oktober 2023"
+    },
+    {
+      "bookId": 2,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas V",
+      "bookRating": 3,
+      "bookImagePath": "book1.png",
+      "borrowingDate": "28 Oktober 2023"
+    }
+
+  ],
+
+  "WishlistBook": [
+    {
+      "bookId": 1,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas VI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id laborum................"
+    },
+    {
+      "bookId": 2,
+      "bookAuthor": "Abdi Aziz",
+      "bookTitle": "Bahasa Inggris Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    },
+    {
+      "bookId": 3,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas VI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id laborum................"
+    },
+    {
+      "bookId": 4,
+      "bookAuthor": "Abdi Aziz",
+      "bookTitle": "Bahasa Inggris Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    },
+    {
+      "bookId": 5,
+      "bookAuthor": "Andi Saputra",
+      "bookTitle": "Buku Siswa Matematika Kelas VI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id laborum................"
+    },
+    {
+      "bookId": 6,
+      "bookAuthor": "Abdi Aziz",
+      "bookTitle": "Bahasa Inggris Kelas XI",
+      "bookStock": 4,
+      "borrowedBooks": 3,
+      "bookCategory": "Buku Pelajaran",
+      "bookRating": 3,
+      "bookSynopsisContent": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum................"
+    }
+  ]
+}

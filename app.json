@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Perpustakaan Uvers",
+    "slug": "perpusuversexpo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/PublicAsset/appsIcon.png",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "@config-plugins/react-native-pdf",
+      "@config-plugins/react-native-blob-util"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.erwin128.perpusuversexpo"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/PublicAsset/appsIcon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.erwin128.perpusuversexpo"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3e3472e5-864c-4699-b2ec-5cb61ad790bd"
+      }
+    }
+  }
+}
