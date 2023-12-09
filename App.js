@@ -18,55 +18,55 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
-    // <NavigationContainer>
-    //   {/* <ImageBackground
-    //     source={require('./assets/BottomNavbarImage.png')} > */}
+    <NavigationContainer>
+      {/* <ImageBackground
+        source={require('./assets/BottomNavbarImage.png')} > */}
 
-    //   <Stack.Navigator initialRouteName="Splash">
-    //     <Stack.Screen
-    //       name="BottomNavbar"
-    //       component={BottomNavbar}
-    //       options={{ headerShown: false }}
-    //     />
-    //     <Stack.Screen
-    //       name="Splash"
-    //       component={Splash}
-    //       options={{ headerShown: false }}
-    //     />
-    //     <Stack.Screen
-    //       name="Login"
-    //       component={Login}
-    //       options={{ headerShown: false }}
-    //     />
-    //     <Stack.Screen name="Home" component={Home} />
-    //     <Stack.Screen name="Book Details" component={BookDetail} />
-    //     <Stack.Screen
-    //       name="Personal Information"
-    //       component={PersonalInformation}
-    //       options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
-    //     />
-    //     <Stack.Screen
-    //       name="Change Password"
-    //       component={ChangePassword}
-    //       options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
-    //     />
-    //     <Stack.Screen
-    //       name="History"
-    //       component={History}
-    //       options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
-    //     />
-    //     <Stack.Screen
-    //       name="Wishlist"
-    //       component={Wishlist}
-    //       options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
-    //     />
-    //   </Stack.Navigator>
-    //   {/* </ImageBackground> */}
-    // </NavigationContainer>
+      <Stack.Navigator initialRouteName="Splash">
+        <Stack.Screen
+          name="BottomNavbar"
+          component={BottomNavbar}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Splash"
+          component={Splash}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Book Details" component={BookDetail} />
+        <Stack.Screen
+          name="Personal Information"
+          component={PersonalInformation}
+          options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
+        />
+        <Stack.Screen
+          name="Change Password"
+          component={ChangePassword}
+          options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
+        />
+        <Stack.Screen
+          name="History"
+          component={History}
+          options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
+        />
+        <Stack.Screen
+          name="Wishlist"
+          component={Wishlist}
+          options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
+        />
+      </Stack.Navigator>
+      {/* </ImageBackground> */}
+    </NavigationContainer>
 
-    <SafeAreaView>
-      <Book />
-    </SafeAreaView>
+    // <SafeAreaView>
+    //   <Book />
+    // </SafeAreaView>
   );
 };
 
