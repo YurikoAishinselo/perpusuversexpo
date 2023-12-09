@@ -12,16 +12,12 @@ import Wishlist from "./screen/Wishlist";
 import Splash from "./screen/Splash";
 import { responsiveFontSize } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Book from "./screen/Book";
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      {/* <ImageBackground
-        source={require('./assets/BottomNavbarImage.png')} > */}
-
       <Stack.Navigator initialRouteName="Splash">
         <Stack.Screen
           name="BottomNavbar"
@@ -61,7 +57,6 @@ const App = () => {
           options={{ headerTitleStyle: { fontSize: responsiveFontSize(3) } }}
         />
       </Stack.Navigator>
-      {/* </ImageBackground> */}
     </NavigationContainer>
 
     // <SafeAreaView>
