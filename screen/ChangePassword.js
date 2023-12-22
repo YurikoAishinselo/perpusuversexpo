@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,8 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
+  Keyboard,
+  Alert,
 } from "react-native";
 import {
   responsiveHeight,
@@ -15,14 +17,128 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 
-const ChangePassword = () => {
-  const profileName = "Tommy Theonanda";
-  const profileEmail = "theonanda.tom@gmail.com";
+const ChangePassword = ({ navigation }) => {
+  const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
+    useState(false);
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const submitNewPassword = async () => {
+    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+    const parameter = {
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirm_password: newPassword,
+    };
 
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(!isPasswordVisible);
+    try {
+      const apiUrl =
+        "https://uvers.ciptainovasidigitalia.com/api/user/change_password";
+      let response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(parameter),
+      });
+      const status = response.status;
+      console.log(status);
+      response = await response.json();
+
+      if (currentPassword === "") {
+        Alert.alert("Current password can not be empty!");
+        return;
+      }
+
+      if (newPassword === "") {
+        Alert.alert("New Password can not be empty!");
+        return;
+      }
+
+      if (status === 200) {
+        navigation.navigate("BottomNavbar");
+        Alert.alert(response.data.message);
+      } else if (status === 401) {
+        Alert.alert("Current password is incorrect!");
+      } else {
+        console.log(response);
+        if (
+          response.error.detail.new_password[0] ===
+          "The new password must be at least 8 characters."
+        ) {
+          Alert.alert("The new password must be at least 8 characters.");
+        } else if (
+          response.error.detail.new_password[0] ===
+          "The new password and current password must be different."
+        ) {
+          Alert.alert(
+            "The new password and current password must be different."
+          );
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const toggleCurrentPasswordVisibility = () => {
+    setIsCurrentPasswordVisible(!isCurrentPasswordVisible);
+  };
+
+  const toggleNewPasswordVisibility = () => {
+    setIsNewPasswordVisible(!isNewPasswordVisible);
+  };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setIsKeyboardOpen(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setIsKeyboardOpen(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  const handleSubmit = () => {
+    // Reset previous error messages
+    setCurrentPasswordError("");
+    setNewPasswordError("");
+
+    // Validate current password
+    if (!currentPassword) {
+      setCurrentPasswordError("Please enter your current password");
+    }
+
+    // Validate new password
+    if (!newPassword) {
+      setNewPasswordError("Please enter your new password");
+    }
+
+    // If no errors, proceed with the submit logic
+    if (!currentPasswordError && !newPasswordError) {
+      console.log("Submit button pressed");
+      // Add your submit logic here
+    } else {
+      // Show error messages
+      Alert.alert("Error", `${currentPasswordError}\n${newPasswordError}`, [
+        { text: "OK" },
+      ]);
+    }
   };
 
   return (
@@ -47,19 +163,29 @@ const ChangePassword = () => {
               style={styles.inputText}
               placeholder="Current Password"
               placeholderTextColor="#BCBEC2"
-              secureTextEntry={!isPasswordVisible}
+              secureTextEntry={!isCurrentPasswordVisible}
+              maxLength={20}
+              value={currentPassword}
+              onChangeText={(text) => setCurrentPassword(text)}
             />
-            <TouchableOpacity onPress={togglePasswordVisibility}>
-              <Image
-                source={
-                  isPasswordVisible
-                  ? require("../assets/PublicAsset/hidePasswordIcon.png")
-                  : require("../assets/PublicAsset/showPasswordIcon.png")
-                }
-                style={isPasswordVisible ? styles.hideIcon : styles.showIcon}
-              />
+            <TouchableOpacity onPress={toggleCurrentPasswordVisibility}>
+              <View style={styles.iconPadding}>
+                <Image
+                  source={
+                    isCurrentPasswordVisible
+                      ? require("../assets/PublicAsset/hidePasswordIcon.png")
+                      : require("../assets/PublicAsset/showPasswordIcon.png")
+                  }
+                  style={
+                    isCurrentPasswordVisible ? styles.hideIcon : styles.showIcon
+                  }
+                />
+              </View>
             </TouchableOpacity>
           </View>
+          {currentPasswordError ? (
+            <Text style={styles.errorText}>{currentPasswordError}</Text>
+          ) : null}
 
           <View style={styles.inputBox}>
             <Image
@@ -70,22 +196,38 @@ const ChangePassword = () => {
               style={styles.inputText}
               placeholder="New Password"
               placeholderTextColor="#BCBEC2"
-              secureTextEntry={!isPasswordVisible}
+              secureTextEntry={!isNewPasswordVisible}
+              maxLength={20}
+              value={newPassword}
+              onChangeText={(text) => setNewPassword(text)}
             />
-            <TouchableOpacity onPress={togglePasswordVisibility}>
-              <Image
-                source={
-                  isPasswordVisible
-                    ? require("../assets/PublicAsset/hidePasswordIcon.png")
-                    : require("../assets/PublicAsset/showPasswordIcon.png")
-                }
-                style={isPasswordVisible ? styles.hideIcon : styles.showIcon}
-              />
+            <TouchableOpacity onPress={toggleNewPasswordVisibility}>
+              <View style={styles.iconPadding}>
+                <Image
+                  source={
+                    isNewPasswordVisible
+                      ? require("../assets/PublicAsset/hidePasswordIcon.png")
+                      : require("../assets/PublicAsset/showPasswordIcon.png")
+                  }
+                  style={
+                    isNewPasswordVisible ? styles.hideIcon : styles.showIcon
+                  }
+                />
+              </View>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.changeButton}>
-            <Text style={styles.bottomButtonText}>Submit</Text>
-          </TouchableOpacity>
+          {newPasswordError ? (
+            <Text style={styles.errorText}>{newPasswordError}</Text>
+          ) : null}
+
+          {!isKeyboardOpen && (
+            <TouchableOpacity
+              style={styles.changeButton}
+              onPress={submitNewPassword}
+            >
+              <Text style={styles.bottomButtonText}>Submit</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </ImageBackground>
@@ -101,7 +243,7 @@ const styles = StyleSheet.create({
   },
 
   changePasswordInputContainer: {
-    marginTop: responsiveHeight(5),
+    marginTop: responsiveHeight(3),
     alignItems: "center",
     height: responsiveHeight(80),
   },
@@ -128,10 +270,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderWidth: 1,
     borderColor: "gray",
-    borderRadius: responsiveHeight(2.1),
-    marginBottom: responsiveHeight(2),
+    borderRadius: responsiveHeight(1.6),
+    marginBottom: responsiveHeight(1),
     paddingLeft: responsiveWidth(2),
     paddingRight: responsiveWidth(3),
+    backgroundColor: "#FFF",
   },
 
   showIcon: {
@@ -171,6 +314,19 @@ const styles = StyleSheet.create({
   bottomButtonText: {
     color: "white",
     fontSize: responsiveFontSize(2.5),
+  },
+
+  iconPadding: {
+    paddingHorizontal: responsiveWidth(1),
+    paddingVertical: responsiveWidth(2.5),
+  },
+
+  errorText: {
+    color: "red",
+    marginBottom: responsiveHeight(2),
+    textAlign: "left",
+    width: responsiveWidth(85),
+    backgroundColor: "#FF00000",
   },
 });
 

@@ -16,12 +16,13 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
+import bcrypt from "react-native-bcrypt";
 
 const windowWidth = Dimensions.get("window").width;
 
 function Login({ navigation }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [usernameText, setUsernameText] = useState("");
+  const [passwordText, setPasswordText] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -51,13 +52,47 @@ function Login({ navigation }) {
   };
 
   const handleButtonPress = () => {
-    if (username === "2021133005" && password === "2021") {
-      navigation.navigate("Home");
-    } else if (username === "" || password == "") {
-      Alert.alert("Fill in your username or password first");
-    } else {
-      Alert.alert("Wrong Username or Password");
-    }
+    // Check if the username and password are valid
+    // const userData = require("../Data/BookData.json");
+    // console.log('All users:');
+    // const user = userData.usersList.find((user) => user.username === username);
+    // console.log('Entered username:', username);
+    // console.log('Entered password:', password);
+    // console.log('User object:', user);
+
+    // if (user) {
+    //   console.log('Stored password:', user.password);
+    //   console.log('Comparison result:', user.password === password);
+    // }
+    const parameter = {
+      username: usernameText,
+      password: passwordText,
+    };
+
+    getUserInfo();
+    const getUserInfo = async () => {
+      await fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(parameter),
+      })
+        .then((response) => {
+          console.log(response.status);
+          if (response.status === 200) {
+            setPasswordText("");
+            setUsernameText("");
+            navigation.navigate("BottomNavbar");
+          } else if (usernameText === "" || passwordText === "") {
+            Alert.alert("Fill in your username or password first");
+          } else {
+            Alert.alert("Wrong Username or Password");
+            setPassword("");
+          }
+        })
+        .catch((e) => console.log(e));
+    };
   };
 
   const handleButtonPressIn = () => {
@@ -90,9 +125,10 @@ function Login({ navigation }) {
           />
           <TextInput
             style={styles.inputText}
-            onChangeText={(text) => setUsername(text)}
-            value={username}
+            onChangeText={(text) => setUsernameText(text)}
+            value={usernameText}
             placeholder="Username"
+            maxLength={30}
           />
         </View>
       </View>
@@ -112,10 +148,11 @@ function Login({ navigation }) {
         </TouchableOpacity>
         <TextInput
           style={styles.inputText}
-          onChangeText={(text) => setPassword(text)}
-          value={password}
+          onChangeText={(text) => setPasswordText(text)}
+          value={passwordText}
           placeholder="Password"
           secureTextEntry={!isPasswordVisible}
+          maxLength={20}
         />
       </View>
       {!isKeyboardOpen && (
@@ -156,8 +193,6 @@ const styles = StyleSheet.create({
     height: responsiveHeight(36),
     zIndex: 2,
     position: "absolute",
-    borderBottomLeftRadius: responsiveHeight(4.5),
-    borderBottomRightRadius: responsiveHeight(4.5),
   },
   inputContainter: {
     marginTop: responsiveHeight(30),
@@ -179,7 +214,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     width: responsiveWidth(80),
     fontSize: responsiveFontSize(2.6),
-    marginLeft: responsiveWidth(2),
+    marginLeft: responsiveWidth(3),
   },
   usernameIcon: {
     height: responsiveHeight(2.6),
@@ -199,7 +234,7 @@ const styles = StyleSheet.create({
   },
 
   showIcon: {
-    width: responsiveHeight(2.4),
+    width: responsiveHeight(2.42),
     height: responsiveHeight(1.8),
   },
 
@@ -221,6 +256,9 @@ const styles = StyleSheet.create({
     paddingVertical: responsiveHeight(2),
     paddingHorizontal: responsiveWidth(35),
     backgroundColor: "#128CFC",
+  },
+  loginButtonPressed: {
+    backgroundColor: "#0d6aad",
   },
 });
 

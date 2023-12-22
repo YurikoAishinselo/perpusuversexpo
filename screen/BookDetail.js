@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
 } from "react-native";
 import {
   responsiveHeight,
@@ -22,11 +23,41 @@ import booksData from "../Data/BookData.json";
 
 const BookDetail = ({ route }) => {
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
+  const [isBorrowed, setIsBorrowed] = useState(false);
+  const [currentStock, setCurrentStock] = useState(0);
   const books = booksData.booksList;
 
+  const { bookIds } = route.params;
+
+  const [bookDetail, setBookDetail] = useState(null);
+  const params = {
+    book_id: bookIds,
+  };
+
+  const apiUrl =
+    "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
+    new URLSearchParams(params);
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
+
+  const fetchInfo = async () => {
+    {
+      try {
+        let result = await fetch(apiUrl);
+        result = await result.json();
+        setBookDetail(result.data.book_lists);
+        setCurrentStock(result.data.book_lists.stock);
+        console.log(result.data.book_lists);
+      } catch (e) {
+        console.error("error", e);
+      }
+    }
+  };
+
   // Assuming you want to display the first book in your JSON data
-  const { bookId } = route.params
-  const firstBook = books[bookId-1];
+  const firstBook = books[0];
   const {
     bookAuthor,
     bookTitle,
@@ -37,124 +68,194 @@ const BookDetail = ({ route }) => {
     bookSynopsisContent,
   } = firstBook;
 
-  // Function to split the text into lines
-  const splitTextIntoLines = (text) => {
-    const words = text.split(" ");
-    let lines = [];
-    let currentLine = "";
+  const bookImagePath = require("../assets/BookAsset/book1.png");
 
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const testWidth = testLine.length * responsiveFontSize(3);
-
-      if (testWidth > responsiveWidth(120)) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    }
-
-    return lines;
+  const handleBorrowNow = () => {
+    setIsBorrowed(true);
+    setCurrentStock(currentStock - 1);
+    Alert.alert("Success", "You have successfully borrowed the book");
   };
 
-  const renderedLines = splitTextIntoLines(bookTitle);
-  const bookImagePath = "../assets/BookAsset/book1.png";
-  const defaultBoxContentHeight = responsiveHeight(43); // Default height
+  const handleNotifyMe = () => {
+    Alert.alert(
+      "Notification",
+      "Notification will be sent when the book is available again"
+    );
+  };
 
-  const [synopsisHeight, setSynopsisHeight] = useState(0);
-
-  // Callback function for the onLayout event to measure the synopsis height
-  const onSynopsisLayout = (event) => {
-    const { height } = event.nativeEvent.layout;
-    console.log("Synopsis Height:", height); // Add this line to log the height
-    setSynopsisHeight(height);
-  
-    // If the height exceeds a certain limit, enable "Read More"
-    if (height > responsiveHeight(100)) {
-      setShowFullSynopsis(false); // Initially show a truncated version
+  const handleReturn = () => {
+    if (isBorrowed) {
+      setIsBorrowed(false);
+      setCurrentStock(currentStock + 1);
+      Alert.alert("Success", "You have successfully returned the book");
     } else {
-      setShowFullSynopsis(true); // Show the full synopsis
+      Alert.alert("Alert", "You haven't borrowed the book yet");
     }
+  };
+
+  const handleReadNow = () => {
+    Alert.alert("Notification", "You can read your book");
+  };
+
+  const splitTitleIntoLines = (title, maxCharactersPerLine) => {
+    if (title.length <= maxCharactersPerLine) {
+      return title;
+    }
+
+    const words = title.split(" ");
+    let currentLine = "";
+    const resultLines = [];
+
+    words.forEach((word) => {
+      if (currentLine.length + word.length <= maxCharactersPerLine) {
+        currentLine += `${word} `;
+      } else {
+        resultLines.push(currentLine.trim());
+        currentLine = `${word} `;
+      }
+    });
+
+    resultLines.push(currentLine.trim());
+
+    return resultLines.join("\n");
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/PublicAsset/defaultBackground.png")}
-      style={styles.backgroundImage}
-    >
-      <ScrollView>
-        <View
-          style={[
-            styles.boxContent,
-            { height: defaultBoxContentHeight + synopsisHeight },
-          ]}
+    <>
+      {bookDetail ? (
+        <ImageBackground
+          source={require("../assets/PublicAsset/defaultBackground.png")}
+          style={styles.backgroundImage}
         >
-          <View style={styles.bookCenterContent}>
-            <View style={styles.box}>
-              <Image source={require(bookImagePath)} style={styles.bookImage} />
-            </View>
-            <View style={styles.bookInfo}>
-              {renderedLines.map((line, index) => (
-                <Text key={index} style={styles.bookTitle}>
-                  {line}
-                </Text>
-              ))}
-              <Text style={styles.bookAuthor}>{bookAuthor}</Text>
-              <View style={styles.bookRating}>
-                <Text style={styles.ratingText}>Rating : {bookRating}</Text>
+          <ScrollView>
+            <View style={styles.bookCenterContent}>
+              <View style={styles.box}>
+                <Image source={bookImagePath} style={styles.bookImage} />
               </View>
-              <Text style={styles.bookStock}>
-                Stok : {bookStock - borrowedBooks}/{bookStock}
-              </Text>
-            </View>
-
-            <View style={styles.bookSynopsis} onLayout={onSynopsisLayout}>
-              <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
-              <View style={styles.bookSynopsisContentContainer}>
+              <View style={styles.bookInfo}>
                 <Text
-                  style={styles.bookSynopsisContent}
-                  numberOfLines={ 4}
+                  style={
+                    splitTitleIntoLines(bookDetail.name, 25).split("\n")
+                      .length > 3
+                      ? styles.bookTitleSmall
+                      : splitTitleIntoLines(bookDetail.name, 25).split("\n")
+                          .length > 5
+                      ? styles.bookTitleVerySmall
+                      : styles.bookTitle
+                  }
+                  numberOfLines={7}
+                  ellipsizeMode="tail"
                 >
-                  {bookSynopsisContent}
+                  {splitTitleIntoLines(bookTitle, 25)}
                 </Text>
-                {!showFullSynopsis && (
-                  <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
-                    <Text style={styles.readMoreLink}>Read More</Text>
-                  </TouchableOpacity>
-                )}
+                <Text style={styles.bookAuthor}>{bookDetail.author}</Text>
+                <View style={styles.bookRating}>
+                  <Text style={styles.ratingText}>Rating : {bookRating}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.bookStock,
+                    { color: bookDetail.stock > 0 ? "#128CFC" : "#FC1212" },
+                  ]}
+                >
+                  Stok : {currentStock}/{bookStock}
+                </Text>
+              </View>
+
+              <View style={styles.bookSynopsis}>
+                <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
+                <View style={styles.bookSynopsisContentContainer}>
+                  <Text
+                    style={styles.bookSynopsisContent}
+                    numberOfLines={showFullSynopsis ? undefined : 4}
+                  >
+                    {bookDetail.synopsis}
+                  </Text>
+                  {!showFullSynopsis && (
+                    <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
+                      <Text style={styles.readMoreLink}>Read More</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-        </View>
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.borrowButton}>
-            <Text style={styles.buttonText}>Borrow Now</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.notifyButton}>
-            <Text style={styles.buttonText}>Notify Me</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.emptyArea}></View>
-      </ScrollView>
-    </ImageBackground>
+            <View style={styles.actionsContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.borrowButton,
+                  {
+                    backgroundColor:
+                      currentStock === 0 && !isBorrowed
+                        ? "#878D92"
+                        : isBorrowed
+                        ? "#4CAF50"
+                        : "#128CFC",
+                  },
+                ]}
+                onPress={() => {
+                  if (currentStock > 0) {
+                    handleBorrowNow();
+                  } else if (isBorrowed) {
+                    // Additional functionality for the "Read Now" button
+                    handleReadNow();
+                  }
+                }}
+                disabled={bookDetail.stock === 0 && !isBorrowed}
+              >
+                <Text style={styles.buttonText}>
+                  {bookDetail.stock === 0 && !isBorrowed
+                    ? "Out of Stock"
+                    : isBorrowed
+                    ? "Read Now"
+                    : "Borrow Now"}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.notifyButton,
+                  {
+                    backgroundColor:
+                      bookDetail.stock === 0 && !isBorrowed
+                        ? "#128CFC"
+                        : isBorrowed
+                        ? "#AF1917"
+                        : "#878D92",
+                  },
+                ]}
+                onPress={() => {
+                  if (isBorrowed) {
+                    // Additional functionality for the "Return" button
+                    handleReturn();
+                  } else {
+                    handleNotifyMe();
+                  }
+                }}
+                disabled={!isBorrowed && currentStock > 0}
+              >
+                <Text style={styles.buttonText}>
+                  {isBorrowed ? "Return" : "Notify me"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </ImageBackground>
+      ) : (
+        <Text>Loading</Text>
+      )}
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  //Background
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center",
   },
-
-  //Book Content
   boxContent: {
     marginTop: responsiveHeight(5),
   },
-
   bookCenterContent: {
     alignItems: "center",
   },
@@ -168,8 +269,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderColor: "#000000",
-
-    // Shadow properties
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -185,30 +284,41 @@ const styles = StyleSheet.create({
   bookSynopsisContentContainer: {
     marginTop: responsiveHeight(1),
   },
-
   readMoreLink: {
     color: "#128CFC",
     marginTop: responsiveHeight(1),
     fontSize: responsiveFontSize(2),
     fontWeight: "bold",
   },
-
   bookImage: {
     height: responsiveHeight(20),
     width: responsiveWidth(30),
     borderRadius: responsiveHeight(1),
   },
-
   bookInfo: {
     justifyContent: "center",
-    marginTop: responsiveHeight(2), // Adjust the marginTop as needed
+    marginTop: responsiveHeight(2),
   },
-
   bookTitle: {
     fontSize: responsiveFontSize(3),
     fontWeight: "bold",
     textAlign: "center",
     color: "#000000",
+    flexWrap: "wrap",
+  },
+  bookTitleSmall: {
+    fontSize: responsiveFontSize(2.5),
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#000000",
+    flexWrap: "wrap",
+  },
+  bookTitleVerySmall: {
+    fontSize: responsiveFontSize(1.5),
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#000000",
+    flexWrap: "wrap",
   },
   bookAuthor: {
     marginTop: responsiveHeight(0.5),
@@ -221,11 +331,9 @@ const styles = StyleSheet.create({
     marginTop: responsiveHeight(0.6),
     alignItems: "center",
   },
-
   ratingText: {
     fontSize: responsiveFontSize(2),
   },
-
   bookStock: {
     color: "#128CFC",
     marginTop: responsiveHeight(0.5),
@@ -236,28 +344,22 @@ const styles = StyleSheet.create({
     textAlign: "left",
     padding: responsiveWidth(7),
   },
-
   bookSynopsisTitle: {
     fontSize: responsiveFontSize(2.3),
     fontWeight: "bold",
   },
-
   bookSynopsisContent: {
     marginTop: responsiveHeight(1),
     fontSize: responsiveFontSize(2),
     color: "#878D92",
     textAlign: "justify",
   },
-
-  //Button
   actionsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    marginBottom: responsiveHeight(2),
+    marginBottom: responsiveHeight(3),
   },
-
-  // Borrow Button
   borrowButton: {
     marginLeft: responsiveWidth(2),
     backgroundColor: "#128CFC",
@@ -266,8 +368,6 @@ const styles = StyleSheet.create({
     height: responsiveHeight(5.8),
     borderRadius: responsiveWidth(2),
   },
-
-  // Notify Button
   notifyButton: {
     marginRight: responsiveWidth(2),
     backgroundColor: "#878D92",
@@ -276,28 +376,21 @@ const styles = StyleSheet.create({
     borderRadius: responsiveWidth(2),
     justifyContent: "center",
   },
-
-  // Button Text
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
     fontSize: responsiveFontSize(2.3),
     textAlign: "center",
-    lineHeight: responsiveHeight(5), // Adjust the line height to center vertically
+    lineHeight: responsiveHeight(5),
   },
-
-  // Read More Link
   readMoreLink: {
     color: "#128CFC",
     marginTop: responsiveHeight(1),
     fontSize: responsiveFontSize(2),
     fontWeight: "bold",
   },
-
-  //empty Area
   emptyArea: {
     height: responsiveHeight(8),
-    // backgroundColor: "#0CB3FA",
   },
 });
 

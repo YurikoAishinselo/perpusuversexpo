@@ -53,11 +53,9 @@ const Wishlist = ({ navigation }) => {
       style={styles.backgroundImage}
     >
       <ScrollView>
-        {/* Book Content */}
         <View style={styles.boxContent}>
           {booksList.map((book) => renderBookCard(book))}
         </View>
-        <View style={styles.emptyArea}></View>
       </ScrollView>
     </ImageBackground>
   );

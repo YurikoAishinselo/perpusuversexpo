@@ -12,6 +12,7 @@ import Wishlist from "./screen/Wishlist";
 import Splash from "./screen/Splash";
 import { responsiveFontSize } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Book from "./screen/Book";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +33,11 @@ const App = () => {
         <Stack.Screen
           name="Login"
           component={Login}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Book"
+          component={Book}
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Home" component={Home} />

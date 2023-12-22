@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,11 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
+import { RadioButton } from "react-native-paper"; // Import RadioButton from react-native-paper
+
 import {
   responsiveHeight,
   responsiveWidth,
@@ -19,18 +23,55 @@ import {
 import booksData from "../Data/BookData.json";
 
 const Home = ({ navigation }) => {
-  const booksList = booksData.booksList;
+  const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
+  const [sortOption, setSortOption] = useState("Option 1");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const renderBookCard = (book) => {
-    const { bookId, bookAuthor, bookTitle, bookRating, bookImagePath } = book;
+  const apiUrl =
+    "https://uvers.ciptainovasidigitalia.com/api/book/get_book_list";
 
+  const [bookLists, setBookLists] = useState([]);
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
+
+  const fetchInfo = async () => {
+    {
+      try {
+        let result = await fetch(apiUrl);
+        result = await result.json();
+        setBookLists(result.data.book_lists);
+      } catch (e) {
+        console.error("error", e);
+      }
+    }
+  };
+
+  const handleRadioButtonPress = (value) => {
+    setSortOption(value);
+  };
+
+  // const booksList = booksData.booksList;
+
+  function renderBookCard(book) {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    const lowerCaseTitle = book.name.toLowerCase();
+    const lowerCaseAuthor = book.author.toLowerCase();
+    const isMatch =
+      lowerCaseTitle.includes(lowerCaseQuery) ||
+      lowerCaseAuthor.includes(lowerCaseQuery);
+
+    if (searchQuery && !isMatch) {
+      return null;
+    }
     return (
       <TouchableOpacity
         style={styles.box}
-        key={bookId}
+        key={book.id}
         onPress={() =>
           navigation.navigate("Book Details", {
-            bookId: bookId,
+            bookIds: book.id,
           })
         }
       >
@@ -41,12 +82,12 @@ const Home = ({ navigation }) => {
           />
         </View>
         <Text style={styles.textJudul} numberOfLines={1}>
-          {bookTitle}{" "}
+          {book.name}{" "}
         </Text>
-        <Text style={styles.textPenulis}>{bookAuthor}</Text>
+        <Text style={styles.textPenulis}>{book.author}</Text>
       </TouchableOpacity>
     );
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,15 +102,17 @@ const Home = ({ navigation }) => {
               <Text style={styles.textHello}>Hello</Text>
               <Text style={styles.textName}>Tommy</Text>
             </View>
-            <View style={styles.rightColumn}>
+            <TouchableOpacity
+              style={styles.rightColumn}
+              onPress={() => navigation.navigate("Personal Information")}
+            >
               <Image
                 style={styles.profileImage}
                 source={require("../assets/homeAsset/photoProfile.png")}
               />
-            </View>
+            </TouchableOpacity>
           </View>
 
-          {/* Search Bar */}
           <View style={styles.searchContent}>
             <View style={styles.searchBar}>
               <TouchableOpacity>
@@ -78,9 +121,17 @@ const Home = ({ navigation }) => {
                   source={require("../assets/homeAsset/searchIcon.png")}
                 />
               </TouchableOpacity>
-              <TextInput style={styles.input} placeholder="Search Books" />
+              <TextInput
+                style={styles.input}
+                placeholder="Search Books"
+                value={searchQuery}
+                onChangeText={(text) => setSearchQuery(text)}
+              />
             </View>
-            <TouchableOpacity style={styles.sortMenu}>
+            <TouchableOpacity
+              style={styles.sortMenu}
+              onPress={() => setIsSortMenuVisible(true)}
+            >
               <Image
                 style={styles.sortIcon}
                 source={require("../assets/homeAsset/filterIcon.png")}
@@ -89,12 +140,42 @@ const Home = ({ navigation }) => {
           </View>
 
           <View style={styles.boxContent}>
-            {booksList.map((book) => renderBookCard(book))}
+            {bookLists && bookLists.length > 0 ? (
+              bookLists.map((book) => renderBookCard(book))
+            ) : (
+              <Text>Loading</Text>
+            )}
           </View>
         </ScrollView>
-      <View style={styles.emptyArea}></View>
-
+        <View style={styles.emptyArea}></View>
       </ImageBackground>
+
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={isSortMenuVisible}
+        onRequestClose={() => setIsSortMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setIsSortMenuVisible(false)}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.sortMenuContainer}>
+          <Text style={styles.popUpMenuTitle}>Sort Options:</Text>
+          <RadioButton.Group
+            onValueChange={handleRadioButtonPress}
+            value={sortOption}
+          >
+            <View style={styles.radioButtonContainer}>
+              <Text style={styles.radioButtonText}>Option 1</Text>
+              <RadioButton value="Option 1" />
+            </View>
+            <View style={styles.radioButtonContainer}>
+              <Text style={styles.radioButtonText}>Option 2</Text>
+              <RadioButton value="Option 2" />
+            </View>
+          </RadioButton.Group>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -111,7 +192,7 @@ const styles = StyleSheet.create({
 
   //header
   headerContainer: {
-    marginTop: responsiveHeight(3.5),
+    marginTop: responsiveHeight(2),
     flexDirection: "row", // Horizontally align elements
     height: responsiveHeight(15),
     // backgroundColor: '#00FF00',
@@ -207,7 +288,7 @@ const styles = StyleSheet.create({
   boxContent: {
     // backgroundColor: '#ff0000',
     flex: 1,
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     flexDirection: "row",
     padding: 5,
     flexWrap: "wrap",
@@ -224,8 +305,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 10,
-    width: responsiveHeight(18),
+    borderRadius: responsiveHeight(1.5),
+    width: responsiveHeight(17),
   },
   textPenulis: {
     fontSize: responsiveFontSize(2),
@@ -241,8 +322,50 @@ const styles = StyleSheet.create({
   },
   bookImage: {
     height: responsiveHeight(15.5),
-    width: responsiveWidth(25.5),
+    width: responsiveHeight(11.9),
     borderRadius: responsiveHeight(0.5),
+  },
+
+  // Pop up menu
+  sortMenuContainer: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: responsiveWidth(60),
+    height: responsiveHeight(15),
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    transform: [
+      { translateX: -responsiveWidth(30) },
+      { translateY: -responsiveHeight(12.5) },
+    ],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  popUpMenuTitle: {
+    fontWeight: "600",
+    fontSize: responsiveFontSize(2),
+    marginBottom: responsiveHeight(1),
+  },
+
+  radioButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  radioButtonText: {
+    marginRight: responsiveWidth(32),
   },
 });
 
