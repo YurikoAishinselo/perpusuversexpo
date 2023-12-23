@@ -16,7 +16,6 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
-import bcrypt from "react-native-bcrypt";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -24,7 +23,6 @@ function Login({ navigation }) {
   const [usernameText, setUsernameText] = useState("");
   const [passwordText, setPasswordText] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
@@ -51,56 +49,35 @@ function Login({ navigation }) {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-  const handleButtonPress = () => {
-    // Check if the username and password are valid
-    // const userData = require("../Data/BookData.json");
-    // console.log('All users:');
-    // const user = userData.usersList.find((user) => user.username === username);
-    // console.log('Entered username:', username);
-    // console.log('Entered password:', password);
-    // console.log('User object:', user);
-
-    // if (user) {
-    //   console.log('Stored password:', user.password);
-    //   console.log('Comparison result:', user.password === password);
-    // }
+  const getUserInfo = () => {
     const parameter = {
       username: usernameText,
       password: passwordText,
     };
 
-    getUserInfo();
-    const getUserInfo = async () => {
-      await fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(parameter),
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(parameter),
+    })
+      .then((response) => {
+        console.log(response.status);
+        if (response.status === 200) {
+          setPasswordText("");
+          setUsernameText("");
+          navigation.navigate("BottomNavbar", {
+            user_id: 1,
+          });
+        } else if (usernameText === "" || passwordText === "") {
+          Alert.alert("Fill in your username or password first");
+        } else {
+          Alert.alert("Wrong Username or Password");
+          setPasswordText("");
+        }
       })
-        .then((response) => {
-          console.log(response.status);
-          if (response.status === 200) {
-            setPasswordText("");
-            setUsernameText("");
-            navigation.navigate("BottomNavbar");
-          } else if (usernameText === "" || passwordText === "") {
-            Alert.alert("Fill in your username or password first");
-          } else {
-            Alert.alert("Wrong Username or Password");
-            setPassword("");
-          }
-        })
-        .catch((e) => console.log(e));
-    };
-  };
-
-  const handleButtonPressIn = () => {
-    setIsButtonPressed(true);
-  };
-
-  const handleButtonPressOut = () => {
-    setIsButtonPressed(false);
+      .catch((e) => console.error(e));
   };
 
   return (
@@ -156,15 +133,7 @@ function Login({ navigation }) {
         />
       </View>
       {!isKeyboardOpen && (
-        <TouchableOpacity
-          style={[
-            styles.loginButton,
-            isButtonPressed && styles.loginButtonPressed,
-          ]}
-          onPress={handleButtonPress}
-          onPressIn={handleButtonPressIn}
-          onPressOut={handleButtonPressOut}
-        >
+        <TouchableOpacity style={styles.loginButton} onPress={getUserInfo}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       )}

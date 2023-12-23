@@ -1,11 +1,13 @@
 import React from "react";
 import { Dimensions, Text, View } from "react-native";
 import Pdf from "react-native-pdf";
-function Book() {
+function Book({ route }) {
+  const { filePath } = route.params;
   const onlineSource = {
-    uri: "https://repo.undiksha.ac.id/7120/9/1713011011-LAMPIRAN.pdf",
+    uri: "https://uvers.ciptainovasidigitalia.com/api/" + filePath,
     cache: true,
   };
+  console.log(onlineSource.uri);
   return (
     <View style={{ flex: 1 }}>
       <Pdf

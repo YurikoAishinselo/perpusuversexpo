@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
   Image,
-  TextInput,
   ImageBackground,
   ScrollView,
   TouchableOpacity,
@@ -15,38 +14,79 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 
-import booksData from "../Data/BookData.json";
+const Wishlist = ({ navigation, route }) => {
+  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+  const { user_id } = route.params;
+  const [myWishList, SetMyWishList] = useState([]);
 
-const Wishlist = ({ navigation }) => {
-  const booksList = booksData.WishlistBook;
+  useEffect(() => {
+    fetchWishList();
+  }, []);
 
-  const renderBookCard = (book) => {
-    const { bookId, bookAuthor, bookTitle, bookRating, bookImagePath } = book;
-
-    return (
-      <TouchableOpacity
-        style={styles.box}
-        key={bookId}
-        onPress={() =>
-          navigation.navigate("Book Details", {
-            bookId: bookId,
-          })
-        }
-      >
-        <View style={styles.inner}>
-          <Image
-            style={styles.bookImage}
-            source={require("../assets/BookAsset/book1.png")}
-          />
-        </View>
-        <Text style={styles.textJudul} numberOfLines={1}>
-          {bookTitle}{" "}
-        </Text>
-        <Text style={styles.textPenulis}>{bookAuthor}</Text>
-      </TouchableOpacity>
-    );
+  const fetchWishList = () => {
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_wish_list", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        SetMyWishList(data.data.wish_lists);
+        console.log(myWishList);
+      })
+      .catch((e) => console.error(e));
   };
 
+  const renderBookCard = async (book) => {
+    const { book_id } = book;
+    const [data, setData] = useState(null);
+    const parameter = {
+      book_id: book_id,
+    };
+
+    const apiUrl =
+      "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
+      new URLSearchParams(parameter);
+
+    try {
+      await fetch(apiUrl)
+        .then((response) => response.json())
+        .then((json) => setData(json.data.book_lists))
+        .catch((e) => console.error(e));
+    } catch (e) {
+      console.error("error", e);
+    }
+    return (
+      <>
+        {data !== null ? (
+          <TouchableOpacity
+            style={styles.box}
+            key={data.id}
+            onPress={() =>
+              navigation.navigate("Book Details", {
+                bookId: data.id,
+              })
+            }
+          >
+            <View style={styles.inner}>
+              <Image
+                style={styles.bookImage}
+                source={require("../assets/BookAsset/book1.png")}
+              />
+            </View>
+            <Text style={styles.textJudul} numberOfLines={1}>
+              {data.name}{" "}
+            </Text>
+            <Text style={styles.textPenulis}>{data.author}</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text>You don't have any wishlist</Text>
+        )}
+      </>
+    );
+  };
   return (
     <ImageBackground
       source={require("../assets/PublicAsset/defaultBackground.png")}
@@ -54,7 +94,11 @@ const Wishlist = ({ navigation }) => {
     >
       <ScrollView>
         <View style={styles.boxContent}>
-          {booksList.map((book) => renderBookCard(book))}
+          {myWishList.length > 0 ? (
+            myWishList.map((book) => renderBookCard(book))
+          ) : (
+            <Text>No Wishlist</Text>
+          )}
         </View>
       </ScrollView>
     </ImageBackground>
@@ -92,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: responsiveHeight(1),
+    borderRadius: responsiveHeight(0.8),
     width: responsiveWidth(38),
   },
   textPenulis: {

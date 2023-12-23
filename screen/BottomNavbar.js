@@ -12,7 +12,8 @@ import {
 
 const Tab = createBottomTabNavigator();
 
-const BottomNavbar = () => {
+const BottomNavbar = ({ route }) => {
+  const { user_id } = route.params;
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -21,9 +22,7 @@ const BottomNavbar = () => {
         headerTitleStyle: {
           fontSize: responsiveFontSize(3),
         },
-        tabBarStyle: {
-          height: 70,
-        },
+        tabBarStyle: { height: responsiveHeight(8) },
         tabBarBackground: () => (
           <Image
             source={require("../assets/PublicAsset/BottomNavbarImage.png")}
@@ -47,11 +46,20 @@ const BottomNavbar = () => {
           }
 
           return (
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                top: responsiveHeight(1.3),
+                position: "absolute",
+              }}
+            >
               <Image
                 source={iconSource}
-                marginTop={responsiveHeight(5.2)}
-                style={{ width: size, height: size }}
+                style={{
+                  width: size,
+                  height: size,
+                }}
               />
               <Text
                 style={{
@@ -67,9 +75,13 @@ const BottomNavbar = () => {
         tabBarLabel: "",
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Home" component={Home} initialParams={{ user_id }} />
       <Tab.Screen name="My Books" component={MyBooks} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        initialParams={{ user_id }}
+      />
     </Tab.Navigator>
   );
 };

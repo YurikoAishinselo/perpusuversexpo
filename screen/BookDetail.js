@@ -21,7 +21,7 @@ import {
 // Import the JSON data
 import booksData from "../Data/BookData.json";
 
-const BookDetail = ({ route }) => {
+const BookDetail = ({ route, navigation }) => {
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isBorrowed, setIsBorrowed] = useState(false);
   const [currentStock, setCurrentStock] = useState(0);
@@ -71,9 +71,13 @@ const BookDetail = ({ route }) => {
   const bookImagePath = require("../assets/BookAsset/book1.png");
 
   const handleBorrowNow = () => {
-    setIsBorrowed(true);
-    setCurrentStock(currentStock - 1);
-    Alert.alert("Success", "You have successfully borrowed the book");
+    if (!isBorrowed) {
+      setIsBorrowed(true);
+      setCurrentStock(currentStock - 1);
+      Alert.alert("Success", "You have successfully borrowed the book");
+    } else {
+      handleReadNow();
+    }
   };
 
   const handleNotifyMe = () => {
@@ -94,7 +98,7 @@ const BookDetail = ({ route }) => {
   };
 
   const handleReadNow = () => {
-    Alert.alert("Notification", "You can read your book");
+    navigation.navigate("Book", { filePath: bookDetail.file_path });
   };
 
   const splitTitleIntoLines = (title, maxCharactersPerLine) => {

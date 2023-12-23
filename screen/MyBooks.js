@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -16,14 +16,33 @@ import {
 import booksData from "../Data/BookData.json";
 
 const MyBook = () => {
+  const bearerToken = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+  const [bookData, setBookData] = useState([]);
   const pageName = "My Books";
   const books = booksData.booksList;
 
-  const renderBookCard = (book) => {
-    const { bookAuthor, bookTitle, bookCategory, bookRating } = book;
+  useEffect(() => {
+    fetchMyBook();
+  }, []);
 
+  const fetchMyBook = () => {
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_book_list", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${bearerToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setBookData(data.data.book_lists);
+      })
+      .catch((e) => console.error(e));
+  };
+
+  const renderBookCard = (book) => {
     return (
-      <View style={styles.bookCard} key={book.bookId}>
+      <View style={styles.bookCard} key={book.id}>
         <View style={styles.bookImagePosition}>
           <Image
             source={require("../assets/BookAsset/book2.png")}
@@ -31,16 +50,16 @@ const MyBook = () => {
           />
         </View>
         <View style={styles.bookInfo}>
-          <Text style={styles.bookTitle}>{bookTitle}</Text>
-          <Text style={styles.bookAuthor}>{bookAuthor}</Text>
-          <Text style={styles.bookAuthor}>{bookCategory}</Text>
+          <Text style={styles.bookTitle}>{book.name}</Text>
+          <Text style={styles.bookAuthor}>{book.author}</Text>
+          <Text style={styles.bookAuthor}>{book.category}</Text>
           <View style={styles.bookRating}>
             <Image
               source={require("../assets/myBookAsset/ratingStarImage.png")}
               style={styles.ratingStar}
             />
             <View>
-              <Text style={styles.ratingText}>{bookRating}</Text>
+              <Text style={styles.ratingText}>5</Text>
             </View>
           </View>
         </View>
@@ -55,7 +74,11 @@ const MyBook = () => {
     >
       <ScrollView>
         <View style={styles.bookContent}>
-          {books.map((book) => renderBookCard(book))}
+          {bookData.length > 0 ? (
+            bookData.map((book) => renderBookCard(book))
+          ) : (
+            <Text>You don't have borrowed book!</Text>
+          )}
         </View>
         <View style={styles.emptyArea}></View>
       </ScrollView>

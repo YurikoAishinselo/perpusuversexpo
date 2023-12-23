@@ -22,7 +22,7 @@ import {
 
 import booksData from "../Data/BookData.json";
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
   const [sortOption, setSortOption] = useState("Option 1");
   const [searchQuery, setSearchQuery] = useState("");
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: responsiveHeight(1.5),
+    borderRadius: responsiveHeight(0.8),
     width: responsiveHeight(17),
   },
   textPenulis: {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,9 +14,28 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 
-const Profile = ({ navigation }) => {
-  const profileName = "Tommy Theonanda";
-  const profileEmail = "theonanda.tom@gmail.com";
+const Profile = ({ navigation, route }) => {
+  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+  const [profile, SetProfile] = useState("");
+  const { user_id } = route.params;
+
+  useEffect(() => {
+    fetchMyProfile();
+  }, []);
+
+  const fetchMyProfile = () => {
+    console.log(user_id);
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_user_info", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => SetProfile(data.data))
+      .catch((e) => console.error(e));
+  };
 
   return (
     <ImageBackground
@@ -29,8 +48,12 @@ const Profile = ({ navigation }) => {
             source={require("../assets/ProfileAsset/profilImage.jpg")}
             style={styles.imageSize}
           ></Image>
-          <Text style={styles.nameText}>{profileName}</Text>
-          <Text style={styles.emailText}>{profileEmail}</Text>
+          <Text style={styles.nameText}>
+            {profile === null ? "Loading..." : profile.name}
+          </Text>
+          <Text style={styles.emailText}>
+            {profile === null ? "Loading..." : profile.email}
+          </Text>
         </View>
 
         <TouchableOpacity
@@ -48,7 +71,7 @@ const Profile = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("Wishlist")}
+          onPress={() => navigation.navigate("Wishlist", { user_id })}
         >
           <View style={styles.profileMenu}>
             <Image
