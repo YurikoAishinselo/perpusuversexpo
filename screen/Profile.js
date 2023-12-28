@@ -58,7 +58,9 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("Personal Information")}
+          onPress={() =>
+            navigation.navigate("Personal Information", { user_id: user_id })
+          }
         >
           <View style={styles.profileMenu}>
             <Image
@@ -71,7 +73,7 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("Wishlist", { user_id })}
+          onPress={() => navigation.navigate("Wishlist", { user_id: user_id })}
         >
           <View style={styles.profileMenu}>
             <Image
@@ -84,7 +86,7 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("History")}
+          onPress={() => navigation.navigate("History", { user_id: user_id })}
         >
           <View style={styles.profileMenu}>
             <Image

@@ -1,13 +1,18 @@
 import React from "react";
 import { Dimensions, Text, View } from "react-native";
 import Pdf from "react-native-pdf";
+import * as FileSystem from "expo-file-system";
+import { usePreventScreenCapture } from "expo-screen-capture";
 function Book({ route }) {
+  usePreventScreenCapture();
   const { filePath } = route.params;
+  const fileDirectory = FileSystem.documentDirectory;
   const onlineSource = {
-    uri: "https://uvers.ciptainovasidigitalia.com/api/" + filePath,
+    uri: `${fileDirectory}/${filePath}.pdf`,
     cache: true,
   };
   console.log(onlineSource.uri);
+
   return (
     <View style={{ flex: 1 }}>
       <Pdf

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -15,19 +15,58 @@ import {
 
 import booksData from "../Data/BookData.json";
 
-const History = () => {
+const History = ({ route }) => {
+  const { user_id } = route.params;
   const historyBooks = booksData.borrowingHistoryBook;
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = () => {
+    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_history", {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const getUserHistory = data.data.history_lists.filter(
+          (history) => history.user_id == user_id
+        );
+
+        getUserHistory.map((history) => {
+          fetchBookDetails(history.book_id).then((data) => {
+            const mergedBook = { ...history, ...data };
+            setHistory((prevWishList) => [...prevWishList, mergedBook]);
+          });
+        });
+      });
+  };
+
+  const fetchBookDetails = (book_id) => {
+    const params = { book_id: book_id };
+    const apiUrl =
+      "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
+      new URLSearchParams(params);
+    return new Promise((resolve, reject) => {
+      fetch(apiUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          resolve(data.data.book_lists);
+        })
+        .catch((error) => {
+          console.error("Error fetching book details:", error);
+          reject(error);
+        });
+    });
+  };
 
   const renderBookCard = (book) => {
-    const {
-      bookId,
-      bookAuthor,
-      bookTitle,
-      bookRating,
-      bookImagePath,
-      borrowingDate,
-    } = book;
-
     return (
       <View style={styles.bookCard} key={book.bookId}>
         <View style={styles.bookImagePosition}>
@@ -37,18 +76,20 @@ const History = () => {
           />
         </View>
         <View style={styles.bookInfo}>
-          <Text style={styles.bookTitle}>{bookTitle}</Text>
+          <Text style={styles.bookTitle}>{book.name}</Text>
           <Text style={styles.bookAuthor} numberOfLines={2}>
-            {bookAuthor}
+            {book.author}
           </Text>
-          <Text style={styles.borrowingDate}>Dipinjam: {borrowingDate}</Text>
+          <Text style={styles.borrowingDate}>
+            Dipinjam: {book.borrowed_date}
+          </Text>
           <View style={styles.bookRating}>
             <Image
               source={require("../assets/myBookAsset/ratingStarImage.png")}
               style={styles.ratingStar}
             />
             <View>
-              <Text style={styles.ratingText}>{bookRating}</Text>
+              <Text style={styles.ratingText}>5</Text>
             </View>
           </View>
         </View>
@@ -63,7 +104,11 @@ const History = () => {
     >
       <ScrollView>
         <View style={styles.bookContent}>
-          {historyBooks.map((book) => renderBookCard(book))}
+          {history.length > 0 ? (
+            history.map((book) => renderBookCard(book))
+          ) : (
+            <Text>You don't have borrowing history</Text>
+          )}
         </View>
         <View style={styles.emptyArea}></View>
       </ScrollView>

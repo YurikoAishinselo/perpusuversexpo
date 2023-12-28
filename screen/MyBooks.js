@@ -14,16 +14,24 @@ import {
 } from "react-native-responsive-dimensions";
 
 import booksData from "../Data/BookData.json";
+import { useFocusEffect } from "@react-navigation/native";
 
-const MyBook = () => {
+const MyBook = ({ navigation, route }) => {
   const bearerToken = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const [bookData, setBookData] = useState([]);
+  const { user_id } = route.params;
   const pageName = "My Books";
   const books = booksData.booksList;
 
   useEffect(() => {
-    fetchMyBook();
-  }, []);
+    const focusListener = navigation.addListener("focus", () => {
+      fetchMyBook();
+    });
+
+    return () => {
+      focusListener();
+    };
+  }, [navigation]);
 
   const fetchMyBook = () => {
     fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_book_list", {
@@ -35,7 +43,10 @@ const MyBook = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setBookData(data.data.book_lists);
+        const getUserBooks = data.data.book_lists.filter(
+          (book) => book.pivot.user_id == user_id
+        );
+        setBookData(getUserBooks);
       })
       .catch((e) => console.error(e));
   };
@@ -52,7 +63,9 @@ const MyBook = () => {
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle}>{book.name}</Text>
           <Text style={styles.bookAuthor}>{book.author}</Text>
-          <Text style={styles.bookAuthor}>{book.category}</Text>
+          <Text style={styles.bookAuthor}>
+            Dipinjam: {book.pivot.borrowed_date}
+          </Text>
           <View style={styles.bookRating}>
             <Image
               source={require("../assets/myBookAsset/ratingStarImage.png")}

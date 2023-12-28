@@ -15,8 +15,8 @@ import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
-  useResponsiveWidth,
 } from "react-native-responsive-dimensions";
+import * as FileSystem from "expo-file-system";
 
 // Import the JSON data
 import booksData from "../Data/BookData.json";
@@ -25,9 +25,12 @@ const BookDetail = ({ route, navigation }) => {
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isBorrowed, setIsBorrowed] = useState(false);
   const [currentStock, setCurrentStock] = useState(0);
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const books = booksData.booksList;
+  let buttonLeftBackgroundColor, buttonRightBackgroundColor;
 
-  const { bookIds } = route.params;
+  const { bookIds, user_id } = route.params;
 
   const [bookDetail, setBookDetail] = useState(null);
   const params = {
@@ -39,7 +42,7 @@ const BookDetail = ({ route, navigation }) => {
     new URLSearchParams(params);
 
   useEffect(() => {
-    fetchInfo();
+    checkIsBorrowed();
   }, []);
 
   const fetchInfo = async () => {
@@ -49,7 +52,6 @@ const BookDetail = ({ route, navigation }) => {
         result = await result.json();
         setBookDetail(result.data.book_lists);
         setCurrentStock(result.data.book_lists.stock);
-        console.log(result.data.book_lists);
       } catch (e) {
         console.error("error", e);
       }
@@ -70,35 +72,167 @@ const BookDetail = ({ route, navigation }) => {
 
   const bookImagePath = require("../assets/BookAsset/book1.png");
 
+  const checkIsBorrowed = () => {
+    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+    const apiUrlBorrowed =
+      "https://uvers.ciptainovasidigitalia.com/api/user/get_book_list";
+
+    fetch(apiUrlBorrowed, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          switch (response.status) {
+            case 400:
+              throw new Error("Bad Request");
+            case 500:
+              throw new Error("Bad Server 500");
+          }
+        }
+        return response.json();
+      })
+      .then((json) => {
+        const getUserBorrowedBookDetail = json.data.book_lists.filter(
+          (book) => book.pivot.user_id == user_id
+        );
+        const borrowedBookDetail = getUserBorrowedBookDetail.filter(
+          (book) => book.pivot.book_id == bookIds
+        );
+        if (borrowedBookDetail.length > 0) {
+          setIsBorrowed(true);
+        } else {
+          setIsBorrowed(false);
+        }
+
+        fetchInfo();
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const handleBorrowNow = () => {
     if (!isBorrowed) {
-      setIsBorrowed(true);
-      setCurrentStock(currentStock - 1);
-      Alert.alert("Success", "You have successfully borrowed the book");
+      const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+      const apiUrl =
+        "https://uvers.ciptainovasidigitalia.com/api/user/borrow_book";
+      const params = {
+        book_id: bookIds,
+      };
+
+      fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(params),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            switch (response.status) {
+              case 400:
+                Alert.alert("Error", "You have already borrowed this book!");
+                throw new Error("Bad Request");
+              case 500:
+                throw new Error("Bad Server 200");
+            }
+          }
+          return response.json();
+        })
+        .then((json) => {
+          setDownloadUrl(json.data.file_url);
+          setIsBorrowed(true);
+          setCurrentStock(currentStock - 1);
+          setIsDownloading(true);
+          downloadFile(downloadUrl);
+        })
+        .catch((e) => Alert.alert(e));
     } else {
       handleReadNow();
     }
   };
 
   const handleNotifyMe = () => {
-    Alert.alert(
-      "Notification",
-      "Notification will be sent when the book is available again"
-    );
+    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+    const addWishListParams = {
+      book_id: bookIds,
+    };
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/add_wish_list", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(addWishListParams),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          switch (response.code) {
+            case "400":
+              throw new Error("Bad Request 400");
+            case "500":
+              throw new Error("Invalid token 500");
+          }
+          Alert.alert(
+            "Notification",
+            "You have added this book to your wish list!"
+          );
+        }
+      })
+      .catch((e) => console.error(e));
   };
 
   const handleReturn = () => {
     if (isBorrowed) {
-      setIsBorrowed(false);
-      setCurrentStock(currentStock + 1);
-      Alert.alert("Success", "You have successfully returned the book");
+      const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+      const apiUrl =
+        "https://uvers.ciptainovasidigitalia.com/api/user/return_book";
+      const params = {
+        book_id: bookIds,
+      };
+
+      fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(params),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            switch (response.status) {
+              case 400:
+                Alert.alert("Error", "You have already returned this book!");
+                throw new Error("Bad Request");
+              case 200:
+                throw new Error("Bad Server 200");
+            }
+          }
+          return response.json();
+        })
+        .then((json) => {
+          setIsBorrowed(false);
+          setCurrentStock(currentStock + 1);
+          Alert.alert("Success", "You have successfully returned the book");
+        })
+        .catch((e) => console.error(e));
     } else {
       Alert.alert("Alert", "You haven't borrowed the book yet");
     }
   };
 
   const handleReadNow = () => {
-    navigation.navigate("Book", { filePath: bookDetail.file_path });
+    if (!isBorrowed) {
+      handleBorrowNow();
+    } else {
+      navigation.navigate("Book", { filePath: bookIds });
+    }
   };
 
   const splitTitleIntoLines = (title, maxCharactersPerLine) => {
@@ -124,6 +258,19 @@ const BookDetail = ({ route, navigation }) => {
     return resultLines.join("\n");
   };
 
+  const downloadFile = async (downloadUrl) => {
+    const fileName = bookIds + ".pdf";
+    const fileDownloadPath = FileSystem.documentDirectory + fileName;
+    FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+      .then(({ uri }) => {
+        setIsDownloading(false);
+        Alert.alert(
+          "Download successful",
+          `Book downloaded successfully in ${uri}`
+        );
+      })
+      .catch((e) => Alert.alert("Error", e));
+  };
   return (
     <>
       {bookDetail ? (
@@ -188,29 +335,32 @@ const BookDetail = ({ route, navigation }) => {
                 style={[
                   styles.borrowButton,
                   {
-                    backgroundColor:
-                      currentStock === 0 && !isBorrowed
-                        ? "#878D92"
-                        : isBorrowed
-                        ? "#4CAF50"
-                        : "#128CFC",
+                    backgroundColor: isBorrowed
+                      ? "#4CAF50"
+                      : isDownloading
+                      ? "#FC7412"
+                      : currentStock === 0
+                      ? "#878D92"
+                      : "#128CFC",
                   },
                 ]}
                 onPress={() => {
-                  if (currentStock > 0) {
-                    handleBorrowNow();
-                  } else if (isBorrowed) {
-                    // Additional functionality for the "Read Now" button
+                  if (isBorrowed > 0) {
                     handleReadNow();
+                  } else if (currentStock > 0) {
+                    // Additional functionality for the "Read Now" button
+                    handleBorrowNow();
                   }
                 }}
                 disabled={bookDetail.stock === 0 && !isBorrowed}
               >
                 <Text style={styles.buttonText}>
-                  {bookDetail.stock === 0 && !isBorrowed
-                    ? "Out of Stock"
-                    : isBorrowed
+                  {isBorrowed
                     ? "Read Now"
+                    : isDownloading
+                    ? "Downloading..."
+                    : bookDetail.stock === 0
+                    ? "Out of Stock"
                     : "Borrow Now"}
                 </Text>
               </TouchableOpacity>

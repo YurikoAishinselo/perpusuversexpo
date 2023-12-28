@@ -17,11 +17,8 @@ import {
 const Wishlist = ({ navigation, route }) => {
   const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const { user_id } = route.params;
-  const [myWishList, SetMyWishList] = useState([]);
-
-  useEffect(() => {
-    fetchWishList();
-  }, []);
+  const [myWishList, setMyWishList] = useState([]);
+  const [bookDetails, setBookDetails] = useState(null);
 
   const fetchWishList = () => {
     fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_wish_list", {
@@ -31,62 +28,63 @@ const Wishlist = ({ navigation, route }) => {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
-        SetMyWishList(data.data.wish_lists);
-        console.log(myWishList);
+      .then((response) => {
+        if (!response.ok) {
+          switch (response.status) {
+            case "400":
+              throw new Error("Bad request");
+            case "401":
+              throw new Error("Not Authorized");
+            case "500":
+              throw new Error("Missing token");
+          }
+        }
+        return response.json();
+      })
+      .then((json) => {
+        const getUserWishList = json.data.wish_lists.filter(
+          (book) => book.user_id == user_id
+        );
+
+        getUserWishList.map((book) => {
+          fetchBookDetails(book.book_id).then((data) => {
+            const mergedBook = { ...book, ...data };
+            setMyWishList((prevWishList) => [...prevWishList, mergedBook]);
+          });
+        });
+        console.log("myWishList", myWishList);
       })
       .catch((e) => console.error(e));
   };
 
-  const renderBookCard = async (book) => {
-    const { book_id } = book;
-    const [data, setData] = useState(null);
-    const parameter = {
-      book_id: book_id,
-    };
-
+  const fetchBookDetails = async (book_id) => {
+    const params = { book_id: book_id };
     const apiUrl =
       "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
-      new URLSearchParams(parameter);
-
-    try {
-      await fetch(apiUrl)
+      new URLSearchParams(params);
+    return new Promise((resolve, reject) => {
+      fetch(apiUrl)
         .then((response) => response.json())
-        .then((json) => setData(json.data.book_lists))
-        .catch((e) => console.error(e));
-    } catch (e) {
-      console.error("error", e);
-    }
-    return (
-      <>
-        {data !== null ? (
-          <TouchableOpacity
-            style={styles.box}
-            key={data.id}
-            onPress={() =>
-              navigation.navigate("Book Details", {
-                bookId: data.id,
-              })
-            }
-          >
-            <View style={styles.inner}>
-              <Image
-                style={styles.bookImage}
-                source={require("../assets/BookAsset/book1.png")}
-              />
-            </View>
-            <Text style={styles.textJudul} numberOfLines={1}>
-              {data.name}{" "}
-            </Text>
-            <Text style={styles.textPenulis}>{data.author}</Text>
-          </TouchableOpacity>
-        ) : (
-          <Text>You don't have any wishlist</Text>
-        )}
-      </>
-    );
+        .then((data) => {
+          resolve(data.data.book_lists);
+        })
+        .catch((error) => {
+          console.error("Error fetching book details:", error);
+          reject(error);
+        });
+    });
   };
+
+  useEffect(() => {
+    fetchWishList();
+  }, []);
+
+  const handleBookPress = (book_id) => {
+    if (bookDetails !== null) {
+      navigation.navigate("Book Details", { bookId: book_id });
+    }
+  };
+
   return (
     <ImageBackground
       source={require("../assets/PublicAsset/defaultBackground.png")}
@@ -95,7 +93,30 @@ const Wishlist = ({ navigation, route }) => {
       <ScrollView>
         <View style={styles.boxContent}>
           {myWishList.length > 0 ? (
-            myWishList.map((book) => renderBookCard(book))
+            myWishList.map((book) => {
+              return (
+                <TouchableOpacity
+                  key={book.book_id}
+                  style={styles.box}
+                  onPress={() => {
+                    handleBookPress(book.book_id);
+                  }}
+                >
+                  <View style={styles.inner}>
+                    <Image
+                      style={styles.bookImage}
+                      source={require("../assets/BookAsset/book1.png")}
+                    />
+                  </View>
+                  <Text style={styles.textJudul} numberOfLines={1}>
+                    {book === null ? "Loading..." : book.name}{" "}
+                  </Text>
+                  <Text style={styles.textPenulis}>
+                    {book === null ? "Loading..." : book.author}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })
           ) : (
             <Text>No Wishlist</Text>
           )}

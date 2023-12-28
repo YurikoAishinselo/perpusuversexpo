@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,13 +13,49 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
-const PersonalInformation = ({ navigation }) => {
+import * as ImagePicker from "expo-image-picker";
+
+const PersonalInformation = ({ navigation, route }) => {
   const profileName = "Tommy Theonanda";
   const profileEmail = "theonanda.tom@gmail.com";
   const profileNIM = "2021133001";
   const profilFakultas = "Komputer";
   const profilJurusan = "Teknik Perangkat Lunak";
   const profilAngkatan = "2021";
+  const [imageSource, setImageSource] = useState("");
+
+  const [profile, SetProfile] = useState("");
+  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
+  const { user_id } = route.params;
+  useEffect(() => {
+    fetchMyProfile();
+  }, []);
+
+  const fetchMyProfile = () => {
+    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_user_info", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => SetProfile(data.data))
+      .catch((e) => console.error(e));
+  };
+
+  const uploadPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    }).catch((e) => console.error(e));
+
+    if (!result.canceled) {
+      setImageSource(result.uri);
+    }
+  };
 
   return (
     <ImageBackground
@@ -27,15 +63,30 @@ const PersonalInformation = ({ navigation }) => {
       style={styles.backgroundImage}
     >
       <ScrollView>
-        <View style={styles.userProfil}>
-          {/* <Image source={require("./assets/senkuProfile.jpeg")}  */}
-          <Image
-            source={require("../assets/ProfileAsset/profilImage.jpg")}
-            style={styles.imageSize}
-          ></Image>
-          <Text style={styles.nameText}>{profileName}</Text>
-          <Text style={styles.emailText}>{profileEmail}</Text>
+        <View style={styles.userProfile}>
+          <View style={styles.profileImageContainer}>
+            <Image
+              source={require("../assets/ProfileAsset/profilImage.jpg")}
+              style={styles.imageSize}
+            />
+            <TouchableOpacity
+              style={styles.editIconContainer}
+              onPress={uploadPhoto}
+            >
+              <Image
+                source={require("../assets/PublicAsset/editIcon.png")}
+                style={styles.editIcon}
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.nameText}>
+            {profile === null ? "Loading..." : profile.name}
+          </Text>
+          <Text style={styles.emailText}>
+            {profile === null ? "Loading..." : profile.email}
+          </Text>
         </View>
+
         <View style={styles.profilePersonalInformation}>
           <Text style={styles.profileTitleText}>NIM</Text>
           <Text style={styles.profileDataText}>{profileNIM}</Text>
@@ -73,9 +124,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  userProfil: {
+  userProfile: {
     marginTop: responsiveHeight(4),
     alignItems: "center",
+  },
+
+  profileImageContainer: {
+    position: "relative",
+    marginBottom: responsiveHeight(1),
+  },
+
+  editIconContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: responsiveWidth(2),
+    backgroundColor: "#fff",
+    padding: responsiveWidth(1.8),
+    borderRadius: responsiveHeight(0.8),
+    borderWidth: responsiveHeight(0.1),
+    borderColor: "#000000",
+  },
+
+  editIcon: {
+    width: responsiveWidth(5.3),
+    height: responsiveWidth(5.3),
   },
 
   imageSize: {

@@ -22,6 +22,7 @@ const BottomNavbar = ({ route }) => {
         headerTitleStyle: {
           fontSize: responsiveFontSize(3),
         },
+        headerTitleAlign: route.name === "Profile" ? "center" : "left",
         tabBarStyle: { height: responsiveHeight(8) },
         tabBarBackground: () => (
           <Image
@@ -76,7 +77,11 @@ const BottomNavbar = ({ route }) => {
       })}
     >
       <Tab.Screen name="Home" component={Home} initialParams={{ user_id }} />
-      <Tab.Screen name="My Books" component={MyBooks} />
+      <Tab.Screen
+        name="My Books"
+        component={MyBooks}
+        initialParams={{ user_id }}
+      />
       <Tab.Screen
         name="Profile"
         component={Profile}

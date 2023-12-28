@@ -26,6 +26,7 @@ const Home = ({ navigation, route }) => {
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
   const [sortOption, setSortOption] = useState("Option 1");
   const [searchQuery, setSearchQuery] = useState("");
+  const { user_id } = route.params;
 
   const apiUrl =
     "https://uvers.ciptainovasidigitalia.com/api/book/get_book_list";
@@ -72,6 +73,7 @@ const Home = ({ navigation, route }) => {
         onPress={() =>
           navigation.navigate("Book Details", {
             bookIds: book.id,
+            user_id: user_id,
           })
         }
       >
