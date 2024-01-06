@@ -76,10 +76,27 @@ function Login({ navigation }) {
       })
         .then((response) => {
           if (response.status === 200) {
-            setPasswordText("");
-            setUsernameText("");
-            navigation.navigate("BottomNavbar", {
-              user_id: 1,
+            response.json().then((data) => {
+              const token = data.data.access_token;
+              fetch(
+                "https://uvers.ciptainovasidigitalia.com/api/user/get_user_info",
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  navigation.navigate("BottomNavbar", {
+                    user_id: 1,
+                    user_data_name: data.data.name,
+                    user_data_email: data.data.email,
+                  });
+                })
+                .catch((e) => console.log(e));
             });
           } else if (usernameText === "" || passwordText === "") {
             Alert.alert("Fill in your username or password first");
@@ -89,7 +106,11 @@ function Login({ navigation }) {
           }
         })
         .catch((e) => Alert.alert(e))
-        .finally(() => setLoading(false));
+        .finally(() => {
+          setPasswordText("");
+          setUsernameText("");
+          setLoading(false);
+        });
     } else {
       setLoading(false);
       Alert.alert("No internet connection!");

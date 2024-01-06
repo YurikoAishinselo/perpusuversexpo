@@ -232,11 +232,17 @@ const BookDetail = ({ route, navigation }) => {
     }
   };
 
-  const handleReadNow = () => {
+  const handleReadNow = async () => {
     if (!isBorrowed) {
       handleBorrowNow();
     } else {
-      navigation.navigate("Book", { filePath: bookIds });
+      const fileName = bookIds;
+      const fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
+      const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
+      if (!fileInfo.exists) {
+      } else {
+        navigation.navigate("Book", { filePath: bookIds });
+      }
     }
   };
 
@@ -263,24 +269,20 @@ const BookDetail = ({ route, navigation }) => {
     return resultLines.join("\n");
   };
 
-  const downloadFile = (downloadUrl) => {
+  const downloadFile = async (downloadUrl) => {
     const fileName = bookIds;
     const fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
-
-    const callback = (downloadProgress) => {
-      const progressValue =
-        downloadProgress.totalBytesWritten /
-        downloadProgress.totalBytesExpectedToWrite;
-      console.log("Progress ", progressValue);
-    };
-    FileSystem.downloadAsync(downloadUrl, fileDownloadPath, {}, callback)
-      .then(({ uri }) => {
-        console.log(`Book downloaded successfully in ${uri}`);
-      })
-      .catch((e) =>
-        Alert.alert("Download failed", e.message || "Unknown error")
-      )
-      .finally(() => setIsDownloading(false));
+    const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
+    if (!fileInfo.exists) {
+      FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+        .then(({ uri }) => {
+          console.log(`Book downloaded successfully in ${uri}`);
+        })
+        .catch((e) =>
+          Alert.alert("Download failed", e.message || "Unknown error")
+        )
+        .finally(() => setIsDownloading(false));
+    }
   };
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -331,7 +333,7 @@ const BookDetail = ({ route, navigation }) => {
                 numberOfLines={7}
                 ellipsizeMode="tail"
               >
-                {splitTitleIntoLines(bookTitle, 25)}
+                {splitTitleIntoLines(bookDetail.name, 25)}
               </Text>
               <Text style={styles.bookAuthor}>{bookDetail.author}</Text>
               <Text style={styles.bookAuthor}>new Rating : {newRating} </Text>
@@ -348,6 +350,7 @@ const BookDetail = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.ratingContainer}
                 onPress={handleRatingPress}
+                activeOpacity={0.7}
               >
                 <Text style={styles.ratingMessage}>Book Rating</Text>
                 <View style={styles.starContainer}>
@@ -522,7 +525,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 5,
+        elevation: 4,
       },
     }),
   },

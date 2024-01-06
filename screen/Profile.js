@@ -17,25 +17,7 @@ import {
 const Profile = ({ navigation, route }) => {
   const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const [profile, SetProfile] = useState("");
-  const { user_id } = route.params;
-
-  useEffect(() => {
-    fetchMyProfile();
-  }, []);
-
-  const fetchMyProfile = () => {
-    console.log(user_id);
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_user_info", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => SetProfile(data.data))
-      .catch((e) => console.error(e));
-  };
+  const { user_id, user_data_name, user_data_email } = route.params;
 
   return (
     <ImageBackground
@@ -48,12 +30,8 @@ const Profile = ({ navigation, route }) => {
             source={require("../assets/ProfileAsset/profilImage.jpg")}
             style={styles.imageSize}
           ></Image>
-          <Text style={styles.nameText}>
-            {profile === null ? "Loading..." : profile.name}
-          </Text>
-          <Text style={styles.emailText}>
-            {profile === null ? "Loading..." : profile.email}
-          </Text>
+          <Text style={styles.nameText}>{user_data_name}</Text>
+          <Text style={styles.emailText}>{user_data_email}</Text>
         </View>
 
         <TouchableOpacity

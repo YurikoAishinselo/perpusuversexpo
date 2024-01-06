@@ -30,7 +30,7 @@ const Home = ({ navigation, route }) => {
   const [sortOption, setSortOption] = useState("Option 1");
   const [searchQuery, setSearchQuery] = useState("");
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const { user_id } = route.params;
+  const { user_id, user_data_name } = route.params;
 
   const apiUrl =
     "https://uvers.ciptainovasidigitalia.com/api/book/get_book_list";
@@ -125,7 +125,7 @@ const Home = ({ navigation, route }) => {
             <View style={styles.headerContainer}>
               <View style={styles.leftColumn}>
                 <Text style={styles.textHello}>Hello</Text>
-                <Text style={styles.textName}>Tommy</Text>
+                <Text style={styles.textName}>{user_data_name}</Text>
               </View>
               <TouchableOpacity
                 style={styles.rightColumn}
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
-    borderWidth: 1,
+    borderWidth: 0.6,
     flexDirection: "row",
     alignItems: "center",
     ...Platform.select({
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
       },
       android: {
-        elevation: 5,
+        elevation: 10,
       },
     }),
   },

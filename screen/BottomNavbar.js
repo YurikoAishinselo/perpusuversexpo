@@ -20,7 +20,7 @@ import {
 const Tab = createBottomTabNavigator();
 
 const BottomNavbar = ({ route }) => {
-  const { user_id } = route.params;
+  const { user_id, user_data_name, user_data_email } = route.params;
 
   return (
     <Tab.Navigator
@@ -84,7 +84,11 @@ const BottomNavbar = ({ route }) => {
         tabBarLabel: "",
       })}
     >
-      <Tab.Screen name="Home" component={Home} initialParams={{ user_id }} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        initialParams={{ user_id, user_data_name }}
+      />
       <Tab.Screen
         name="My Books"
         component={MyBooks}
@@ -93,7 +97,7 @@ const BottomNavbar = ({ route }) => {
       <Tab.Screen
         name="Profile"
         component={Profile}
-        initialParams={{ user_id }}
+        initialParams={{ user_id, user_data_name, user_data_email }}
       />
     </Tab.Navigator>
   );

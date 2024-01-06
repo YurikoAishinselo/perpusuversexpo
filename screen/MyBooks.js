@@ -61,6 +61,7 @@ const MyBook = ({ navigation, route }) => {
         onPress={() => {
           navigation.navigate("Book Details", {
             bookIds: book.id,
+            user_id: user_id,
           });
         }}
       >
