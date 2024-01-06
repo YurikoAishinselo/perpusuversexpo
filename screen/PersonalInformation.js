@@ -22,7 +22,9 @@ const PersonalInformation = ({ navigation, route }) => {
   const profilFakultas = "Komputer";
   const profilJurusan = "Teknik Perangkat Lunak";
   const profilAngkatan = "2021";
-  const [imageSource, setImageSource] = useState("");
+  const [imageSource, setImageSource] = useState(
+    "../assets/ProfileAsset/profilImage.jpg"
+  );
 
   const [profile, SetProfile] = useState("");
   const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
@@ -53,7 +55,7 @@ const PersonalInformation = ({ navigation, route }) => {
     }).catch((e) => console.error(e));
 
     if (!result.canceled) {
-      setImageSource(result.uri);
+      setImageSource(result.assets[0].uri);
     }
   };
 
@@ -65,10 +67,7 @@ const PersonalInformation = ({ navigation, route }) => {
       <ScrollView>
         <View style={styles.userProfile}>
           <View style={styles.profileImageContainer}>
-            <Image
-              source={require("../assets/ProfileAsset/profilImage.jpg")}
-              style={styles.imageSize}
-            />
+            <Image source={{ uri: imageSource }} style={styles.imageSize} />
             <TouchableOpacity
               style={styles.editIconContainer}
               onPress={uploadPhoto}

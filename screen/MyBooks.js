@@ -6,6 +6,8 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import {
   responsiveHeight,
@@ -20,6 +22,7 @@ const MyBook = ({ navigation, route }) => {
   const bearerToken = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const [bookData, setBookData] = useState([]);
   const { user_id } = route.params;
+  const [loading, setLoading] = useState(true);
   const pageName = "My Books";
   const books = booksData.booksList;
 
@@ -48,35 +51,44 @@ const MyBook = ({ navigation, route }) => {
         );
         setBookData(getUserBooks);
       })
-      .catch((e) => console.error(e));
+      .catch((e) => console.error(e))
+      .finally(() => setLoading(false));
   };
 
   const renderBookCard = (book) => {
     return (
-      <View style={styles.bookCard} key={book.id}>
-        <View style={styles.bookImagePosition}>
-          <Image
-            source={require("../assets/BookAsset/book2.png")}
-            style={styles.bookImage}
-          />
-        </View>
-        <View style={styles.bookInfo}>
-          <Text style={styles.bookTitle}>{book.name}</Text>
-          <Text style={styles.bookAuthor}>{book.author}</Text>
-          <Text style={styles.bookAuthor}>
-            Dipinjam: {book.pivot.borrowed_date}
-          </Text>
-          <View style={styles.bookRating}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Book Details", {
+            bookIds: book.id,
+          });
+        }}
+      >
+        <View style={styles.bookCard} key={book.id}>
+          <View style={styles.bookImagePosition}>
             <Image
-              source={require("../assets/myBookAsset/ratingStarImage.png")}
-              style={styles.ratingStar}
+              source={require("../assets/BookAsset/book2.png")}
+              style={styles.bookImage}
             />
-            <View>
-              <Text style={styles.ratingText}>5</Text>
+          </View>
+          <View style={styles.bookInfo}>
+            <Text style={styles.bookTitle}>{book.name}</Text>
+            <Text style={styles.bookAuthor}>{book.author}</Text>
+            <Text style={styles.bookAuthor}>
+              Dipinjam: {book.pivot.borrowed_date}
+            </Text>
+            <View style={styles.bookRating}>
+              <Image
+                source={require("../assets/myBookAsset/ratingStarImage.png")}
+                style={styles.ratingStar}
+              />
+              <View>
+                <Text style={styles.ratingText}>5</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -85,16 +97,18 @@ const MyBook = ({ navigation, route }) => {
       source={require("../assets/PublicAsset/defaultBackground.png")}
       style={styles.backgroundImage}
     >
-      <ScrollView>
-        <View style={styles.bookContent}>
-          {bookData.length > 0 ? (
-            bookData.map((book) => renderBookCard(book))
-          ) : (
-            <Text>You don't have borrowed book!</Text>
-          )}
-        </View>
-        <View style={styles.emptyArea}></View>
-      </ScrollView>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : bookData.length > 0 ? (
+        <ScrollView>
+          <View style={styles.bookContent}>
+            {bookData.map((book) => renderBookCard(book))}
+          </View>
+          <View style={styles.emptyArea}></View>
+        </ScrollView>
+      ) : (
+        <Text>You don't have borrowed book!</Text>
+      )}
     </ImageBackground>
   );
 };

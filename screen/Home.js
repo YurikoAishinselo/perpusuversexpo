@@ -11,8 +11,10 @@ import {
   SafeAreaView,
   Modal,
   TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { RadioButton } from "react-native-paper"; // Import RadioButton from react-native-paper
+import { KeyboardAvoidingView } from "react-native";
 
 import {
   responsiveHeight,
@@ -21,11 +23,13 @@ import {
 } from "react-native-responsive-dimensions";
 
 import booksData from "../Data/BookData.json";
+import BottomNavbar from "./BottomNavbar";
 
 const Home = ({ navigation, route }) => {
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
   const [sortOption, setSortOption] = useState("Option 1");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const { user_id } = route.params;
 
   const apiUrl =
@@ -35,6 +39,23 @@ const Home = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchInfo();
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setIsKeyboardOpen(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setIsKeyboardOpen(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
   }, []);
 
   const fetchInfo = async () => {
@@ -66,6 +87,7 @@ const Home = ({ navigation, route }) => {
     if (searchQuery && !isMatch) {
       return null;
     }
+
     return (
       <TouchableOpacity
         style={styles.box}
@@ -92,93 +114,95 @@ const Home = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={require("../assets/PublicAsset/defaultBackground.png")}
-        style={styles.backgroundImage}
-      >
-        <ScrollView>
-          {/* Header */}
-          <View style={styles.headerContainer}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.textHello}>Hello</Text>
-              <Text style={styles.textName}>Tommy</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.rightColumn}
-              onPress={() => navigation.navigate("Personal Information")}
-            >
-              <Image
-                style={styles.profileImage}
-                source={require("../assets/homeAsset/photoProfile.png")}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.searchContent}>
-            <View style={styles.searchBar}>
-              <TouchableOpacity>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <ImageBackground
+          source={require("../assets/PublicAsset/defaultBackground.png")}
+          style={styles.backgroundImage}
+        >
+          <ScrollView>
+            {/* Header */}
+            <View style={styles.headerContainer}>
+              <View style={styles.leftColumn}>
+                <Text style={styles.textHello}>Hello</Text>
+                <Text style={styles.textName}>Tommy</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.rightColumn}
+                onPress={() => navigation.navigate("Personal Information")}
+              >
                 <Image
-                  style={styles.searchIcon}
-                  source={require("../assets/homeAsset/searchIcon.png")}
+                  style={styles.profileImage}
+                  source={require("../assets/homeAsset/photoProfile.png")}
                 />
               </TouchableOpacity>
-              <TextInput
-                style={styles.input}
-                placeholder="Search Books"
-                value={searchQuery}
-                onChangeText={(text) => setSearchQuery(text)}
-              />
             </View>
-            <TouchableOpacity
-              style={styles.sortMenu}
-              onPress={() => setIsSortMenuVisible(true)}
+
+            <View style={styles.searchContent}>
+              <View style={styles.searchBar}>
+                <TouchableOpacity>
+                  <Image
+                    style={styles.searchIcon}
+                    source={require("../assets/homeAsset/searchIcon.png")}
+                  />
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Search Books"
+                  value={searchQuery}
+                  onChangeText={(text) => setSearchQuery(text)}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.sortMenu}
+                onPress={() => setIsSortMenuVisible(true)}
+              >
+                <Image
+                  style={styles.sortIcon}
+                  source={require("../assets/homeAsset/filterIcon.png")}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.boxContent}>
+              {bookLists && bookLists.length > 0 ? (
+                bookLists.map((book) => renderBookCard(book))
+              ) : (
+                <Text style={{ flex: 1, flexGrow: 1 }}>Loading</Text>
+              )}
+            </View>
+          </ScrollView>
+          <View style={styles.emptyArea}></View>
+        </ImageBackground>
+
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={isSortMenuVisible}
+          onRequestClose={() => setIsSortMenuVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setIsSortMenuVisible(false)}>
+            <View style={styles.modalOverlay} />
+          </TouchableWithoutFeedback>
+          <View style={styles.sortMenuContainer}>
+            <Text style={styles.popUpMenuTitle}>Sort Options:</Text>
+            <RadioButton.Group
+              onValueChange={handleRadioButtonPress}
+              value={sortOption}
             >
-              <Image
-                style={styles.sortIcon}
-                source={require("../assets/homeAsset/filterIcon.png")}
-              />
-            </TouchableOpacity>
+              <View style={styles.radioButtonContainer}>
+                <Text style={styles.radioButtonText}>Option 1</Text>
+                <RadioButton value="Option 1" />
+              </View>
+              <View style={styles.radioButtonContainer}>
+                <Text style={styles.radioButtonText}>Option 2</Text>
+                <RadioButton value="Option 2" />
+              </View>
+            </RadioButton.Group>
           </View>
-
-          <View style={styles.boxContent}>
-            {bookLists && bookLists.length > 0 ? (
-              bookLists.map((book) => renderBookCard(book))
-            ) : (
-              <Text>Loading</Text>
-            )}
-          </View>
-        </ScrollView>
-        <View style={styles.emptyArea}></View>
-      </ImageBackground>
-
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={isSortMenuVisible}
-        onRequestClose={() => setIsSortMenuVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setIsSortMenuVisible(false)}>
-          <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
-        <View style={styles.sortMenuContainer}>
-          <Text style={styles.popUpMenuTitle}>Sort Options:</Text>
-          <RadioButton.Group
-            onValueChange={handleRadioButtonPress}
-            value={sortOption}
-          >
-            <View style={styles.radioButtonContainer}>
-              <Text style={styles.radioButtonText}>Option 1</Text>
-              <RadioButton value="Option 1" />
-            </View>
-            <View style={styles.radioButtonContainer}>
-              <Text style={styles.radioButtonText}>Option 2</Text>
-              <RadioButton value="Option 2" />
-            </View>
-          </RadioButton.Group>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

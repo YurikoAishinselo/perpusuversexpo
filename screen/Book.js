@@ -8,7 +8,7 @@ function Book({ route }) {
   const { filePath } = route.params;
   const fileDirectory = FileSystem.documentDirectory;
   const onlineSource = {
-    uri: `${fileDirectory}/${filePath}.pdf`,
+    uri: `${fileDirectory}${filePath}.pdf`,
     cache: true,
   };
   console.log(onlineSource.uri);

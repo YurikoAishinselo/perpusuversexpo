@@ -1,5 +1,12 @@
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  Keyboard,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "./Home";
 import Profile from "./Profile";
@@ -14,6 +21,7 @@ const Tab = createBottomTabNavigator();
 
 const BottomNavbar = ({ route }) => {
   const { user_id } = route.params;
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -22,7 +30,7 @@ const BottomNavbar = ({ route }) => {
         headerTitleStyle: {
           fontSize: responsiveFontSize(3),
         },
-        headerTitleAlign: route.name === "Profile" ? "center" : "left",
+        headerTitleAlign: "center",
         tabBarStyle: { height: responsiveHeight(8) },
         tabBarBackground: () => (
           <Image

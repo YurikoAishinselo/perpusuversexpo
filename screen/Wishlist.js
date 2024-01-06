@@ -118,7 +118,15 @@ const Wishlist = ({ navigation, route }) => {
               );
             })
           ) : (
-            <Text>No Wishlist</Text>
+            <Text
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              No Wishlist
+            </Text>
           )}
         </View>
       </ScrollView>

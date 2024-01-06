@@ -10,12 +10,14 @@ import {
   Dimensions,
   Alert,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import {
   responsiveHeight,
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
+import * as Network from "expo-network";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -24,6 +26,8 @@ function Login({ navigation }) {
   const [passwordText, setPasswordText] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -39,6 +43,12 @@ function Login({ navigation }) {
       }
     );
 
+    const checkInternetConnection = async () => {
+      const netInfoState = await Network.getNetworkStateAsync();
+      setIsConnected(netInfoState.isConnected);
+    };
+    checkInternetConnection();
+
     return () => {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
@@ -50,34 +60,40 @@ function Login({ navigation }) {
   };
 
   const getUserInfo = () => {
+    setLoading(true);
     const parameter = {
       username: usernameText,
       password: passwordText,
     };
 
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(parameter),
-    })
-      .then((response) => {
-        console.log(response.status);
-        if (response.status === 200) {
-          setPasswordText("");
-          setUsernameText("");
-          navigation.navigate("BottomNavbar", {
-            user_id: 1,
-          });
-        } else if (usernameText === "" || passwordText === "") {
-          Alert.alert("Fill in your username or password first");
-        } else {
-          Alert.alert("Wrong Username or Password");
-          setPasswordText("");
-        }
+    if (isConnected) {
+      fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(parameter),
       })
-      .catch((e) => console.error(e));
+        .then((response) => {
+          if (response.status === 200) {
+            setPasswordText("");
+            setUsernameText("");
+            navigation.navigate("BottomNavbar", {
+              user_id: 1,
+            });
+          } else if (usernameText === "" || passwordText === "") {
+            Alert.alert("Fill in your username or password first");
+          } else {
+            Alert.alert("Wrong Username or Password");
+            setPasswordText("");
+          }
+        })
+        .catch((e) => Alert.alert(e))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+      Alert.alert("No internet connection!");
+    }
   };
 
   return (
@@ -137,6 +153,7 @@ function Login({ navigation }) {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       )}
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
     </SafeAreaView>
   );
 }

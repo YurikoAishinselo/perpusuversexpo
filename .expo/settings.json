@@ -1,10 +1,10 @@
 {
-  "hostType": "lan",
+  "hostType": "localhost",
   "lanType": "ip",
   "dev": true,
   "minify": false,
   "urlRandomness": null,
   "https": false,
   "scheme": "com.erwin128.perpusuversexpo",
-  "devClient": false
+  "devClient": true
 }

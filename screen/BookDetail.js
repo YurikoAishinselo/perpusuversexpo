@@ -10,7 +10,9 @@ import {
   ScrollView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+import Modal from "react-native-modal";
 import {
   responsiveHeight,
   responsiveWidth,
@@ -28,7 +30,7 @@ const BookDetail = ({ route, navigation }) => {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const books = booksData.booksList;
-  let buttonLeftBackgroundColor, buttonRightBackgroundColor;
+  const [loading, setLoading] = useState(true);
 
   const { bookIds, user_id } = route.params;
 
@@ -54,6 +56,8 @@ const BookDetail = ({ route, navigation }) => {
         setCurrentStock(result.data.book_lists.stock);
       } catch (e) {
         console.error("error", e);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -145,11 +149,12 @@ const BookDetail = ({ route, navigation }) => {
           return response.json();
         })
         .then((json) => {
+          console.log(json.data.file_url);
           setDownloadUrl(json.data.file_url);
           setIsBorrowed(true);
           setCurrentStock(currentStock - 1);
           setIsDownloading(true);
-          downloadFile(downloadUrl);
+          downloadFile(json.data.file_url);
         })
         .catch((e) => Alert.alert(e));
     } else {
@@ -218,7 +223,7 @@ const BookDetail = ({ route, navigation }) => {
         })
         .then((json) => {
           setIsBorrowed(false);
-          setCurrentStock(currentStock + 1);
+          setCurrentStock(parseInt(currentStock) + 1);
           Alert.alert("Success", "You have successfully returned the book");
         })
         .catch((e) => console.error(e));
@@ -258,146 +263,232 @@ const BookDetail = ({ route, navigation }) => {
     return resultLines.join("\n");
   };
 
-  const downloadFile = async (downloadUrl) => {
-    const fileName = bookIds + ".pdf";
-    const fileDownloadPath = FileSystem.documentDirectory + fileName;
-    FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+  const downloadFile = (downloadUrl) => {
+    const fileName = bookIds;
+    const fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
+
+    const callback = (downloadProgress) => {
+      const progressValue =
+        downloadProgress.totalBytesWritten /
+        downloadProgress.totalBytesExpectedToWrite;
+      console.log("Progress ", progressValue);
+    };
+    FileSystem.downloadAsync(downloadUrl, fileDownloadPath, {}, callback)
       .then(({ uri }) => {
-        setIsDownloading(false);
-        Alert.alert(
-          "Download successful",
-          `Book downloaded successfully in ${uri}`
-        );
+        console.log(`Book downloaded successfully in ${uri}`);
       })
-      .catch((e) => Alert.alert("Error", e));
+      .catch((e) =>
+        Alert.alert("Download failed", e.message || "Unknown error")
+      )
+      .finally(() => setIsDownloading(false));
   };
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(5);
+
+  const handleStarPress = (starCount) => {
+    // Update the selectedStars state when a star is pressed
+    setSelectedStars(starCount);
+  };
+
+  const handleRatingPress = () => {
+    // Show the modal when the rating container is pressed
+    setModalVisible(true);
+  };
+
+  const handleBackdropPress = () => {
+    // Auto-close the modal when tapping outside
+    setModalVisible(false);
+  };
+  let newRating = selectedStars;
+
+  const submitRating = () => {
+    setModalVisible(false);
+  };
+
   return (
-    <>
+    <ImageBackground
+      source={require("../assets/PublicAsset/defaultBackground.png")}
+      style={styles.backgroundImage}
+    >
       {bookDetail ? (
-        <ImageBackground
-          source={require("../assets/PublicAsset/defaultBackground.png")}
-          style={styles.backgroundImage}
-        >
-          <ScrollView>
-            <View style={styles.bookCenterContent}>
-              <View style={styles.box}>
-                <Image source={bookImagePath} style={styles.bookImage} />
-              </View>
-              <View style={styles.bookInfo}>
-                <Text
-                  style={
-                    splitTitleIntoLines(bookDetail.name, 25).split("\n")
-                      .length > 3
-                      ? styles.bookTitleSmall
-                      : splitTitleIntoLines(bookDetail.name, 25).split("\n")
-                          .length > 5
-                      ? styles.bookTitleVerySmall
-                      : styles.bookTitle
-                  }
-                  numberOfLines={7}
-                  ellipsizeMode="tail"
-                >
-                  {splitTitleIntoLines(bookTitle, 25)}
-                </Text>
-                <Text style={styles.bookAuthor}>{bookDetail.author}</Text>
-                <View style={styles.bookRating}>
-                  <Text style={styles.ratingText}>Rating : {bookRating}</Text>
+        <ScrollView>
+          <View style={styles.bookCenterContent}>
+            <View style={styles.box}>
+              <Image source={bookImagePath} style={styles.bookImage} />
+            </View>
+            <View style={styles.bookInfo}>
+              <Text
+                style={
+                  splitTitleIntoLines(bookDetail.name, 25).split("\n").length >
+                  3
+                    ? styles.bookTitleSmall
+                    : splitTitleIntoLines(bookDetail.name, 25).split("\n")
+                        .length > 5
+                    ? styles.bookTitleVerySmall
+                    : styles.bookTitle
+                }
+                numberOfLines={7}
+                ellipsizeMode="tail"
+              >
+                {splitTitleIntoLines(bookTitle, 25)}
+              </Text>
+              <Text style={styles.bookAuthor}>{bookDetail.author}</Text>
+              <Text style={styles.bookAuthor}>new Rating : {newRating} </Text>
+              <Text
+                style={[
+                  styles.bookStock,
+                  { color: bookDetail.stock > 0 ? "#128CFC" : "#FC1212" },
+                ]}
+              >
+                Stok : {currentStock}/{bookStock}
+              </Text>
+            </View>
+            <View style={styles.bookSynopsis}>
+              <TouchableOpacity
+                style={styles.ratingContainer}
+                onPress={handleRatingPress}
+              >
+                <Text style={styles.ratingMessage}>Book Rating</Text>
+                <View style={styles.starContainer}>
+                  {[...Array(bookRating).keys()].map((index) => (
+                    <Image
+                      key={index}
+                      source={require("../assets/PublicAsset/fillStar.png")}
+                      style={styles.starImage}
+                    />
+                  ))}
+                  {[...Array(5 - bookRating).keys()].map((index) => (
+                    <Image
+                      key={index + bookDetail.rating}
+                      source={require("../assets/PublicAsset/blackOutlineStar.png")}
+                      style={styles.starImage}
+                    />
+                  ))}
                 </View>
-                <Text
-                  style={[
-                    styles.bookStock,
-                    { color: bookDetail.stock > 0 ? "#128CFC" : "#FC1212" },
-                  ]}
-                >
-                  Stok : {currentStock}/{bookStock}
-                </Text>
-              </View>
+              </TouchableOpacity>
 
-              <View style={styles.bookSynopsis}>
-                <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
-                <View style={styles.bookSynopsisContentContainer}>
-                  <Text
-                    style={styles.bookSynopsisContent}
-                    numberOfLines={showFullSynopsis ? undefined : 4}
-                  >
-                    {bookDetail.synopsis}
-                  </Text>
-                  {!showFullSynopsis && (
-                    <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
-                      <Text style={styles.readMoreLink}>Read More</Text>
+              <Modal
+                isVisible={isModalVisible}
+                animationIn="slideInUp"
+                animationOut="slideOutDown"
+                onBackdropPress={handleBackdropPress}
+              >
+                <View style={styles.ratingModalContainer}>
+                  <View style={styles.whiteContainer}>
+                    <Text style={styles.ratingModalTitle}>Rate this Book</Text>
+                    <View style={styles.starModalContainer}>
+                      {[1, 2, 3, 4, 5].map((starCount) => (
+                        <TouchableOpacity
+                          key={starCount}
+                          onPress={() => handleStarPress(starCount)}
+                        >
+                          <Image
+                            source={require("../assets/PublicAsset/filledStar.png")}
+                            style={[
+                              styles.starImageModal,
+                              {
+                                tintColor:
+                                  starCount <= selectedStars
+                                    ? "#FFD700"
+                                    : "#D3D3D3",
+                              },
+                            ]}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    <TouchableOpacity
+                      style={styles.submitRatingButton}
+                      onPress={submitRating}
+                    >
+                      <Text style={styles.submitRatingButtonText}>Submit</Text>
                     </TouchableOpacity>
-                  )}
+                  </View>
                 </View>
+              </Modal>
+              <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
+              <View style={styles.bookSynopsisContentContainer}>
+                <Text
+                  style={styles.bookSynopsisContent}
+                  numberOfLines={showFullSynopsis ? undefined : 4}
+                >
+                  {bookDetail.synopsis}
+                </Text>
+                {!showFullSynopsis && (
+                  <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
+                    <Text style={styles.readMoreLink}>Read More</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
-            <View style={styles.actionsContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.borrowButton,
-                  {
-                    backgroundColor: isBorrowed
-                      ? "#4CAF50"
-                      : isDownloading
-                      ? "#FC7412"
-                      : currentStock === 0
-                      ? "#878D92"
-                      : "#128CFC",
-                  },
-                ]}
-                onPress={() => {
-                  if (isBorrowed > 0) {
-                    handleReadNow();
-                  } else if (currentStock > 0) {
-                    // Additional functionality for the "Read Now" button
-                    handleBorrowNow();
-                  }
-                }}
-                disabled={bookDetail.stock === 0 && !isBorrowed}
-              >
-                <Text style={styles.buttonText}>
-                  {isBorrowed
-                    ? "Read Now"
+          </View>
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.borrowButton,
+                {
+                  backgroundColor: isBorrowed
+                    ? "#4CAF50"
                     : isDownloading
-                    ? "Downloading..."
-                    : bookDetail.stock === 0
-                    ? "Out of Stock"
-                    : "Borrow Now"}
-                </Text>
-              </TouchableOpacity>
+                    ? "#FC7412"
+                    : currentStock === 0
+                    ? "#878D92"
+                    : "#128CFC",
+                },
+              ]}
+              onPress={() => {
+                if (isBorrowed > 0) {
+                  handleReadNow();
+                } else if (currentStock > 0) {
+                  // Additional functionality for the "Read Now" button
+                  handleBorrowNow();
+                }
+              }}
+              disabled={bookDetail.stock === 0 && !isBorrowed}
+            >
+              <Text style={styles.buttonText}>
+                {isBorrowed
+                  ? "Read Now"
+                  : isDownloading
+                  ? "Downloading..."
+                  : bookDetail.stock === 0
+                  ? "Out of Stock"
+                  : "Borrow Now"}
+              </Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.notifyButton,
-                  {
-                    backgroundColor:
-                      bookDetail.stock === 0 && !isBorrowed
-                        ? "#128CFC"
-                        : isBorrowed
-                        ? "#AF1917"
-                        : "#878D92",
-                  },
-                ]}
-                onPress={() => {
-                  if (isBorrowed) {
-                    // Additional functionality for the "Return" button
-                    handleReturn();
-                  } else {
-                    handleNotifyMe();
-                  }
-                }}
-                disabled={!isBorrowed && currentStock > 0}
-              >
-                <Text style={styles.buttonText}>
-                  {isBorrowed ? "Return" : "Notify me"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </ImageBackground>
+            <TouchableOpacity
+              style={[
+                styles.notifyButton,
+                {
+                  backgroundColor:
+                    bookDetail.stock === 0 && !isBorrowed
+                      ? "#128CFC"
+                      : isBorrowed
+                      ? "#AF1917"
+                      : "#878D92",
+                },
+              ]}
+              onPress={() => {
+                if (isBorrowed) {
+                  handleReturn();
+                } else {
+                  handleNotifyMe();
+                }
+              }}
+              disabled={!isBorrowed && currentStock > 0}
+            >
+              <Text style={styles.buttonText}>
+                {isBorrowed ? "Return" : "Notify me"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       ) : (
-        <Text>Loading</Text>
+        <ActivityIndicator size="large" color="#0000ff" />
       )}
-    </>
+    </ImageBackground>
   );
 };
 
@@ -496,9 +587,11 @@ const styles = StyleSheet.create({
   },
   bookSynopsis: {
     textAlign: "left",
-    padding: responsiveWidth(7),
+    padding: responsiveWidth(5),
   },
   bookSynopsisTitle: {
+    marginTop: responsiveHeight(2),
+    // backgroundColor: "#ff0000",
     fontSize: responsiveFontSize(2.3),
     fontWeight: "bold",
   },
@@ -518,14 +611,14 @@ const styles = StyleSheet.create({
     marginLeft: responsiveWidth(2),
     backgroundColor: "#128CFC",
     justifyContent: "center",
-    width: responsiveWidth(37),
+    width: responsiveWidth(39),
     height: responsiveHeight(5.8),
     borderRadius: responsiveWidth(2),
   },
   notifyButton: {
     marginRight: responsiveWidth(2),
     backgroundColor: "#878D92",
-    width: responsiveWidth(37),
+    width: responsiveWidth(39),
     height: responsiveHeight(5.8),
     borderRadius: responsiveWidth(2),
     justifyContent: "center",
@@ -545,6 +638,60 @@ const styles = StyleSheet.create({
   },
   emptyArea: {
     height: responsiveHeight(8),
+  },
+  ratingContainer: {
+    // backgroundColor: "#ff0000",
+    // flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  ratingMessage: {
+    textAlign: "left",
+    fontSize: responsiveFontSize(2.3),
+    fontWeight: "bold",
+  },
+  starContainer: {
+    marginTop: responsiveHeight(1),
+    flexDirection: "row",
+  },
+  starImage: {
+    height: responsiveHeight(2),
+    width: responsiveHeight(2),
+    marginRight: responsiveWidth(2),
+  },
+  starImageModal: {
+    height: responsiveHeight(4),
+    width: responsiveHeight(4),
+    marginRight: responsiveWidth(3),
+    // backgroundColor: "#ff0000",
+  },
+  starModalContainer: {
+    flexDirection: "row",
+  },
+  submitRatingButton: {
+    paddingHorizontal: responsiveWidth(10),
+    backgroundColor: "#128CFC",
+    bottom: responsiveHeight(3),
+    position: "absolute",
+    paddingVertical: responsiveHeight(1),
+    borderRadius: responsiveHeight(1),
+  },
+
+  submitRatingButtonText: {
+    color: "#fff",
+    fontSize: responsiveFontSize(2),
+  },
+
+  whiteContainer: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: responsiveHeight(12),
+    borderRadius: responsiveWidth(2),
+    alignItems: "center",
+  },
+  ratingModalTitle: {
+    fontSize: responsiveFontSize(3.5),
+    fontWeight: "bold",
+    position: "absolute",
+    top: responsiveHeight(3),
   },
 });
 

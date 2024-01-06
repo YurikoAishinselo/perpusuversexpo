@@ -4,7 +4,7 @@
       "bookId": 1,
       "bookAuthor": "Andi Saputra",
       "bookTitle": "Buku Siswa Matematika Kelas VI",
-      "bookStock": 4,
+      "bookStock": 5,
       "borrowedBooks": 3,
       "bookCategory": "Buku Pelajaran",
       "bookRating": 3,

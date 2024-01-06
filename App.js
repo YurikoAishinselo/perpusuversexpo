@@ -13,6 +13,7 @@ import Splash from "./screen/Splash";
 import { responsiveFontSize } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Book from "./screen/Book";
+import { useEffect } from "react";
 
 const Stack = createNativeStackNavigator();
 
