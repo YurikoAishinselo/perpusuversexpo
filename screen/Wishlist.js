@@ -7,6 +7,7 @@ import {
   ImageBackground,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import {
   responsiveHeight,
@@ -15,17 +16,17 @@ import {
 } from "react-native-responsive-dimensions";
 
 const Wishlist = ({ navigation, route }) => {
-  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
-  const { user_id } = route.params;
+  const { user_id, user_token } = route.params;
   const [myWishList, setMyWishList] = useState([]);
   const [bookDetails, setBookDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchWishList = () => {
     fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_wish_list", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${user_token}`,
       },
     })
       .then((response) => {
@@ -52,7 +53,7 @@ const Wishlist = ({ navigation, route }) => {
             setMyWishList((prevWishList) => [...prevWishList, mergedBook]);
           });
         });
-        console.log("myWishList", myWishList);
+        setIsLoading(false);
       })
       .catch((e) => console.error(e));
   };
@@ -90,46 +91,50 @@ const Wishlist = ({ navigation, route }) => {
       source={require("../assets/PublicAsset/defaultBackground.png")}
       style={styles.backgroundImage}
     >
-      <ScrollView>
-        <View style={styles.boxContent}>
-          {myWishList.length > 0 ? (
-            myWishList.map((book) => {
-              return (
-                <TouchableOpacity
-                  key={book.book_id}
-                  style={styles.box}
-                  onPress={() => {
-                    handleBookPress(book.book_id);
-                  }}
-                >
-                  <View style={styles.inner}>
-                    <Image
-                      style={styles.bookImage}
-                      source={require("../assets/BookAsset/book1.png")}
-                    />
-                  </View>
-                  <Text style={styles.textJudul} numberOfLines={1}>
-                    {book === null ? "Loading..." : book.name}{" "}
-                  </Text>
-                  <Text style={styles.textPenulis}>
-                    {book === null ? "Loading..." : book.author}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })
-          ) : (
-            <Text
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              No Wishlist
-            </Text>
-          )}
-        </View>
-      </ScrollView>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <ScrollView>
+          <View style={styles.boxContent}>
+            {myWishList.length > 0 ? (
+              myWishList.map((book) => {
+                return (
+                  <TouchableOpacity
+                    key={book.book_id}
+                    style={styles.box}
+                    onPress={() => {
+                      handleBookPress(book.book_id);
+                    }}
+                  >
+                    <View style={styles.inner}>
+                      <Image
+                        style={styles.bookImage}
+                        source={require("../assets/BookAsset/book1.png")}
+                      />
+                    </View>
+                    <Text style={styles.textJudul} numberOfLines={1}>
+                      {book === null ? "Loading..." : book.name}{" "}
+                    </Text>
+                    <Text style={styles.textPenulis}>
+                      {book === null ? "Loading..." : book.author}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              <Text
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                No Wishlist
+              </Text>
+            )}
+          </View>
+        </ScrollView>
+      )}
     </ImageBackground>
   );
 };

@@ -15,9 +15,8 @@ import {
 } from "react-native-responsive-dimensions";
 
 const Profile = ({ navigation, route }) => {
-  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const [profile, SetProfile] = useState("");
-  const { user_id, user_data_name, user_data_email } = route.params;
+  const { user_id, user_data_name, user_data_email, user_token } = route.params;
 
   return (
     <ImageBackground
@@ -51,7 +50,12 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("Wishlist", { user_id: user_id })}
+          onPress={() =>
+            navigation.navigate("Wishlist", {
+              user_id: user_id,
+              user_token: user_token,
+            })
+          }
         >
           <View style={styles.profileMenu}>
             <Image
@@ -64,7 +68,12 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("History", { user_id: user_id })}
+          onPress={() =>
+            navigation.navigate("History", {
+              user_id: user_id,
+              user_token: user_token,
+            })
+          }
         >
           <View style={styles.profileMenu}>
             <Image

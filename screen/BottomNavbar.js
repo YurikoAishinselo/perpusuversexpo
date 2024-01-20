@@ -20,86 +20,116 @@ import {
 const Tab = createBottomTabNavigator();
 
 const BottomNavbar = ({ route }) => {
-  const { user_id, user_data_name, user_data_email } = route.params;
+  const { user_id, user_data_name, user_data_email, user_token } = route.params;
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setIsKeyboardOpen(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setIsKeyboardOpen(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
-    <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={({ route }) => ({
-        headerShown: route.name === "Home" ? false : true,
-        headerTitleStyle: {
-          fontSize: responsiveFontSize(3),
-        },
-        headerTitleAlign: "center",
-        tabBarStyle: { height: responsiveHeight(8) },
-        tabBarBackground: () => (
-          <Image
-            source={require("../assets/PublicAsset/BottomNavbarImage.png")}
-            style={styles.tabBarImage}
-          />
-        ),
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconSource;
-          if (route.name === "Home") {
-            iconSource = focused
-              ? require("../assets/PublicAsset/homeIconActive.png")
-              : require("../assets/PublicAsset/homeIcon.png");
-          } else if (route.name === "My Books") {
-            iconSource = focused
-              ? require("../assets/PublicAsset/myBookIconActive.png")
-              : require("../assets/PublicAsset/myBookIcon.png");
-          } else if (route.name === "Profile") {
-            iconSource = focused
-              ? require("../assets/PublicAsset/profileIconActive.png")
-              : require("../assets/PublicAsset/profileIcon.png");
-          }
-
-          return (
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                top: responsiveHeight(1.3),
-                position: "absolute",
-              }}
-            >
+    <>
+      {!isKeyboardOpen && (
+        <Tab.Navigator
+          initialRouteName="Home"
+          screenOptions={({ route }) => ({
+            headerShown: route.name === "Home" ? false : true,
+            headerTitleStyle: {
+              fontSize: responsiveFontSize(3),
+            },
+            headerTitleAlign: "center",
+            tabBarStyle: { height: responsiveHeight(8) },
+            tabBarBackground: () => (
               <Image
-                source={iconSource}
-                style={{
-                  width: size,
-                  height: size,
-                }}
+                source={require("../assets/PublicAsset/BottomNavbarImage.png")}
+                style={styles.tabBarImage}
               />
-              <Text
-                style={{
-                  color: focused ? "#ffffff" : "#7ABCFF",
-                  fontSize: responsiveFontSize(1.8),
-                }}
-              >
-                {route.name}
-              </Text>
-            </View>
-          );
-        },
-        tabBarLabel: "",
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        initialParams={{ user_id, user_data_name }}
-      />
-      <Tab.Screen
-        name="My Books"
-        component={MyBooks}
-        initialParams={{ user_id }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={Profile}
-        initialParams={{ user_id, user_data_name, user_data_email }}
-      />
-    </Tab.Navigator>
+            ),
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconSource;
+              if (route.name === "Home") {
+                iconSource = focused
+                  ? require("../assets/PublicAsset/homeIconActive.png")
+                  : require("../assets/PublicAsset/homeIcon.png");
+              } else if (route.name === "My Books") {
+                iconSource = focused
+                  ? require("../assets/PublicAsset/myBookIconActive.png")
+                  : require("../assets/PublicAsset/myBookIcon.png");
+              } else if (route.name === "Profile") {
+                iconSource = focused
+                  ? require("../assets/PublicAsset/profileIconActive.png")
+                  : require("../assets/PublicAsset/profileIcon.png");
+              }
+
+              return (
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    top: responsiveHeight(1.3),
+                    position: "absolute",
+                  }}
+                >
+                  <Image
+                    source={iconSource}
+                    style={{
+                      width: size,
+                      height: size,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: focused ? "#ffffff" : "#7ABCFF",
+                      fontSize: responsiveFontSize(1.8),
+                    }}
+                  >
+                    {route.name}
+                  </Text>
+                </View>
+              );
+            },
+            tabBarLabel: "",
+          })}
+        >
+          <Tab.Screen
+            name="Home"
+            component={Home}
+            initialParams={{ user_id, user_data_name }}
+          />
+          <Tab.Screen
+            name="My Books"
+            component={MyBooks}
+            initialParams={{ user_id }}
+          />
+          <Tab.Screen
+            name="Profile"
+            component={Profile}
+            initialParams={{
+              user_id,
+              user_data_name,
+              user_data_email,
+              user_token,
+            }}
+          />
+        </Tab.Navigator>
+      )}
+    </>
   );
 };
 const styles = StyleSheet.create({

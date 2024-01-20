@@ -28,7 +28,7 @@ const PersonalInformation = ({ navigation, route }) => {
 
   const [profile, SetProfile] = useState("");
   const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
-  const { user_id } = route.params;
+  const { user_id, user_data, user_token } = route.params;
   useEffect(() => {
     fetchMyProfile();
   }, []);

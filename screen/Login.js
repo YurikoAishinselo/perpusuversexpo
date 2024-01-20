@@ -94,6 +94,7 @@ function Login({ navigation }) {
                     user_id: 1,
                     user_data_name: data.data.name,
                     user_data_email: data.data.email,
+                    user_token: token,
                   });
                 })
                 .catch((e) => console.log(e));

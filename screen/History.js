@@ -6,6 +6,7 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import {
   responsiveHeight,
@@ -16,21 +17,21 @@ import {
 import booksData from "../Data/BookData.json";
 
 const History = ({ route }) => {
-  const { user_id } = route.params;
+  const { user_id, user_token } = route.params;
   const historyBooks = booksData.borrowingHistoryBook;
   const [history, setHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchHistory();
   }, []);
 
   const fetchHistory = () => {
-    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
     fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_history", {
       method: "GET",
       headers: {
         "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${user_token}`,
       },
     })
       .then((response) => response.json())
@@ -45,6 +46,8 @@ const History = ({ route }) => {
             setHistory((prevWishList) => [...prevWishList, mergedBook]);
           });
         });
+
+        setIsLoading(false);
       });
   };
 
@@ -102,16 +105,20 @@ const History = ({ route }) => {
       source={require("../assets/PublicAsset/defaultBackground.png")}
       style={styles.backgroundImage}
     >
-      <ScrollView>
-        <View style={styles.bookContent}>
-          {history.length > 0 ? (
-            history.map((book) => renderBookCard(book))
-          ) : (
-            <Text>You don't have borrowing history</Text>
-          )}
-        </View>
-        <View style={styles.emptyArea}></View>
-      </ScrollView>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <ScrollView>
+          <View style={styles.bookContent}>
+            {history.length > 0 ? (
+              history.map((book) => renderBookCard(book))
+            ) : (
+              <Text>You don't have borrowing history</Text>
+            )}
+          </View>
+          <View style={styles.emptyArea}></View>
+        </ScrollView>
+      )}
     </ImageBackground>
   );
 };
