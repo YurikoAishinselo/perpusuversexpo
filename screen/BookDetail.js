@@ -19,6 +19,7 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 import * as FileSystem from "expo-file-system";
+import apiUrl from "../Data/ApiUrl";
 
 // Import the JSON data
 import booksData from "../Data/BookData.json";
@@ -32,16 +33,14 @@ const BookDetail = ({ route, navigation }) => {
   const books = booksData.booksList;
   const [loading, setLoading] = useState(true);
 
-  const { bookIds, user_id } = route.params;
+  const { bookIds, user_id, user_token } = route.params;
 
   const [bookDetail, setBookDetail] = useState(null);
   const params = {
     book_id: bookIds,
   };
 
-  const apiUrl =
-    "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
-    new URLSearchParams(params);
+  const Url = apiUrl + "book/get_book_detail?" + new URLSearchParams(params);
 
   useEffect(() => {
     checkIsBorrowed();
@@ -50,7 +49,7 @@ const BookDetail = ({ route, navigation }) => {
   const fetchInfo = async () => {
     {
       try {
-        let result = await fetch(apiUrl);
+        let result = await fetch(Url);
         result = await result.json();
         setBookDetail(result.data.book_lists);
         setCurrentStock(result.data.book_lists.stock);
@@ -77,15 +76,13 @@ const BookDetail = ({ route, navigation }) => {
   const bookImagePath = require("../assets/BookAsset/book1.png");
 
   const checkIsBorrowed = () => {
-    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
-    const apiUrlBorrowed =
-      "https://uvers.ciptainovasidigitalia.com/api/user/get_book_list";
+    const apiUrlBorrowed = apiUrl + "user/get_book_list";
 
     fetch(apiUrlBorrowed, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${user_token}`,
       },
     })
       .then((response) => {
@@ -121,18 +118,16 @@ const BookDetail = ({ route, navigation }) => {
 
   const handleBorrowNow = () => {
     if (!isBorrowed) {
-      const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
-      const apiUrl =
-        "https://uvers.ciptainovasidigitalia.com/api/user/borrow_book";
+      const borrowUrl = apiUrl + "user/borrow_book";
       const params = {
         book_id: bookIds,
       };
 
-      fetch(apiUrl, {
+      fetch(borrowUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user_token}`,
         },
         body: JSON.stringify(params),
       })
@@ -163,15 +158,14 @@ const BookDetail = ({ route, navigation }) => {
   };
 
   const handleNotifyMe = () => {
-    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
     const addWishListParams = {
       book_id: bookIds,
     };
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/add_wish_list", {
+    fetch(apiUrl + "user/add_wish_list", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${user_token}`,
       },
       body: JSON.stringify(addWishListParams),
     })
@@ -194,18 +188,16 @@ const BookDetail = ({ route, navigation }) => {
 
   const handleReturn = () => {
     if (isBorrowed) {
-      const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
-      const apiUrl =
-        "https://uvers.ciptainovasidigitalia.com/api/user/return_book";
+      const returnUrl = apiUrl + "user/return_book";
       const params = {
         book_id: bookIds,
       };
 
-      fetch(apiUrl, {
+      fetch(returnUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user_token}`,
         },
         body: JSON.stringify(params),
       })

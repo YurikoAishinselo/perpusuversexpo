@@ -14,6 +14,7 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 import * as ImagePicker from "expo-image-picker";
+import apiUrl from "../Data/ApiUrl";
 
 const PersonalInformation = ({ navigation, route }) => {
   const profileName = "Tommy Theonanda";
@@ -27,18 +28,17 @@ const PersonalInformation = ({ navigation, route }) => {
   );
 
   const [profile, SetProfile] = useState("");
-  const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const { user_id, user_data, user_token } = route.params;
   useEffect(() => {
     fetchMyProfile();
   }, []);
 
   const fetchMyProfile = () => {
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_user_info", {
+    fetch(apiUrl + "user/get_user_info", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${user_token}`,
       },
     })
       .then((response) => response.json())

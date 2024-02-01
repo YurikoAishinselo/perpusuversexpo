@@ -18,6 +18,7 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 import * as Network from "expo-network";
+import apiUrl from "../Data/ApiUrl";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -67,7 +68,7 @@ function Login({ navigation }) {
     };
 
     if (isConnected) {
-      fetch("https://uvers.ciptainovasidigitalia.com/api/user/login", {
+      fetch(apiUrl + "user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,25 +76,27 @@ function Login({ navigation }) {
         body: JSON.stringify(parameter),
       })
         .then((response) => {
+          console.log("response status", response.status);
           if (response.status === 200) {
             response.json().then((data) => {
+              console.log("token", data.data.token);
               const token = data.data.access_token;
-              fetch(
-                "https://uvers.ciptainovasidigitalia.com/api/user/get_user_info",
-                {
-                  method: "GET",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              )
-                .then((res) => res.json())
-                .then((data) => {
+              fetch(apiUrl + "user/get_user_info", {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              })
+                .then((res) => {
+                  console.log("response get user info", res.status);
+                  return res.json();
+                })
+                .then((datas) => {
                   navigation.navigate("BottomNavbar", {
                     user_id: 1,
-                    user_data_name: data.data.name,
-                    user_data_email: data.data.email,
+                    user_data_name: datas.data.name,
+                    user_data_email: datas.data.email,
                     user_token: token,
                   });
                 })
@@ -101,7 +104,9 @@ function Login({ navigation }) {
             });
           } else if (usernameText === "" || passwordText === "") {
             Alert.alert("Fill in your username or password first");
-          } else {
+          } else if (response.status === 401) {
+            Alert.alert("Server error!");
+          } else if (response.status === 402) {
             Alert.alert("Wrong Username or Password");
             setPasswordText("");
           }
@@ -124,6 +129,7 @@ function Login({ navigation }) {
         source={require("../assets/PublicAsset/defaultBackground.png")}
         style={styles.backgroundImage}
       />
+
       <Image
         source={require("../assets/loginAsset/loginBackground.png")}
         style={styles.loginBackgroundImage}
@@ -225,12 +231,12 @@ const styles = StyleSheet.create({
     marginLeft: responsiveWidth(3),
   },
   usernameIcon: {
-    height: responsiveHeight(2.6),
+    height: responsiveHeight(2.7),
     width: responsiveHeight(2.6),
     marginTop: responsiveHeight(1.1),
     marginBottom: responsiveHeight(1),
     justifyContent: "center",
-    marginLeft: responsiveWidth(1),
+    marginLeft: responsiveWidth(1.4),
     alignItems: "center",
   },
   passwordIcon: {
@@ -242,12 +248,12 @@ const styles = StyleSheet.create({
   },
 
   showIcon: {
-    width: responsiveHeight(2.42),
-    height: responsiveHeight(1.8),
+    width: responsiveHeight(2.6),
+    height: responsiveHeight(1.78),
   },
 
   hideIcon: {
-    width: responsiveHeight(2.4),
+    width: responsiveHeight(2.6),
     height: responsiveHeight(1.8),
   },
 

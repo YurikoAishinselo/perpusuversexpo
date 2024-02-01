@@ -12,9 +12,10 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { RadioButton } from "react-native-paper"; // Import RadioButton from react-native-paper
-import { KeyboardAvoidingView } from "react-native";
+// import { KeyboardAvoidingView } from "react-native";
 
 import {
   responsiveHeight,
@@ -24,17 +25,20 @@ import {
 
 import booksData from "../Data/BookData.json";
 import BottomNavbar from "./BottomNavbar";
+import apiUrl from "../Data/ApiUrl";
 
 const Home = ({ navigation, route }) => {
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
   const [sortOption, setSortOption] = useState("Option 1");
   const [searchQuery, setSearchQuery] = useState("");
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const { user_id, user_data_name } = route.params;
+  const { user_id, user_data_name, user_token } = route.params;
 
-  const apiUrl =
-    "https://uvers.ciptainovasidigitalia.com/api/book/get_book_list";
+  const namaArray = user_data_name.split(" ");
+  const namaPertama = namaArray[0];
+  const jumlahHuruf = namaPertama.replace(/\s/g, "").length;
 
+  const [isLoading, setIsLoading] = useState(true);
   const [bookLists, setBookLists] = useState([]);
 
   useEffect(() => {
@@ -51,30 +55,21 @@ const Home = ({ navigation, route }) => {
         setIsKeyboardOpen(false);
       }
     );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
   }, []);
 
   const fetchInfo = async () => {
     {
       try {
-        let result = await fetch(apiUrl);
+        let result = await fetch(apiUrl + "book/get_book_list");
         result = await result.json();
         setBookLists(result.data.book_lists);
       } catch (e) {
         console.error("error", e);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
-
-  const handleRadioButtonPress = (value) => {
-    setSortOption(value);
-  };
-
-  // const booksList = booksData.booksList;
 
   function renderBookCard(book) {
     const lowerCaseQuery = searchQuery.toLowerCase();
@@ -96,6 +91,7 @@ const Home = ({ navigation, route }) => {
           navigation.navigate("Book Details", {
             bookIds: book.id,
             user_id: user_id,
+            user_token: user_token,
           })
         }
       >
@@ -124,7 +120,18 @@ const Home = ({ navigation, route }) => {
           <View style={styles.headerContainer}>
             <View style={styles.leftColumn}>
               <Text style={styles.textHello}>Hello</Text>
-              <Text style={styles.textName}>{user_data_name}</Text>
+              <Text
+                style={{
+                  fontSize:
+                    jumlahHuruf > 10
+                      ? responsiveFontSize(2.5)
+                      : responsiveFontSize(3),
+                  fontWeight: "bold",
+                  color: "#000000",
+                }}
+              >
+                {namaPertama}
+              </Text>
             </View>
             <TouchableOpacity
               style={styles.rightColumn}
@@ -152,7 +159,7 @@ const Home = ({ navigation, route }) => {
                 onChangeText={(text) => setSearchQuery(text)}
               />
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.sortMenu}
               onPress={() => setIsSortMenuVisible(true)}
             >
@@ -160,46 +167,38 @@ const Home = ({ navigation, route }) => {
                 style={styles.sortIcon}
                 source={require("../assets/homeAsset/filterIcon.png")}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.boxContent}>
-            {bookLists && bookLists.length > 0 ? (
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : bookLists && bookLists.length > 0 ? (
               bookLists.map((book) => renderBookCard(book))
             ) : (
-              <Text style={{ flex: 1, flexGrow: 1 }}>Loading</Text>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // backgroundColor: "#ff0000",
+                  height: responsiveHeight(30),
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: responsiveFontSize(3),
+                  }}
+                >
+                  Book is empty!
+                </Text>
+              </View>
             )}
           </View>
         </ScrollView>
         <View style={styles.emptyArea}></View>
       </ImageBackground>
-
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={isSortMenuVisible}
-        onRequestClose={() => setIsSortMenuVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setIsSortMenuVisible(false)}>
-          <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
-        <View style={styles.sortMenuContainer}>
-          <Text style={styles.popUpMenuTitle}>Sort Options:</Text>
-          <RadioButton.Group
-            onValueChange={handleRadioButtonPress}
-            value={sortOption}
-          >
-            <View style={styles.radioButtonContainer}>
-              <Text style={styles.radioButtonText}>Option 1</Text>
-              <RadioButton value="Option 1" />
-            </View>
-            <View style={styles.radioButtonContainer}>
-              <Text style={styles.radioButtonText}>Option 2</Text>
-              <RadioButton value="Option 2" />
-            </View>
-          </RadioButton.Group>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -223,7 +222,7 @@ const styles = StyleSheet.create({
   },
   leftColumn: {
     marginVertical: responsiveHeight(5),
-    marginHorizontal: responsiveWidth(7),
+    marginHorizontal: responsiveWidth(6),
     flex: 1, // Occupy 1/2 of the row space
     justifyContent: "center", // Vertically center elements
     alignItems: "flex-start", // Align items to the start (left)
@@ -238,11 +237,6 @@ const styles = StyleSheet.create({
   textHello: {
     fontSize: responsiveFontSize(3),
     color: "#7C7C7C",
-  },
-  textName: {
-    fontSize: responsiveFontSize(3.5),
-    fontWeight: "bold",
-    color: "#000000",
   },
   profileImage: {
     height: responsiveWidth(20),
@@ -259,12 +253,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   searchBar: {
-    flex: 0.75, // Reduce the flex value to make it smaller
+    flex: 0.9, // Reduce the flex value to make it smaller
     height: responsiveHeight(6),
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
-    borderWidth: 0.6,
+    borderBottomRightRadius: 10,
+    borderTopRightRadius: 10,
+    borderWidth: responsiveHeight(0.1),
     flexDirection: "row",
     alignItems: "center",
     ...Platform.select({

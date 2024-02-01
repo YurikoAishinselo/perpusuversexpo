@@ -14,6 +14,7 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
+import apiUrl from "../Data/ApiUrl";
 
 const Wishlist = ({ navigation, route }) => {
   const { user_id, user_token } = route.params;
@@ -22,7 +23,7 @@ const Wishlist = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchWishList = () => {
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_wish_list", {
+    fetch(apiUrl + "user/get_wish_list", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

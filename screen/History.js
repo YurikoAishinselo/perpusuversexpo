@@ -15,6 +15,7 @@ import {
 } from "react-native-responsive-dimensions";
 
 import booksData from "../Data/BookData.json";
+import apiUrl from "../Data/ApiUrl";
 
 const History = ({ route }) => {
   const { user_id, user_token } = route.params;
@@ -27,7 +28,7 @@ const History = ({ route }) => {
   }, []);
 
   const fetchHistory = () => {
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_history", {
+    fetch(apiUrl + "user/get_history", {
       method: "GET",
       headers: {
         "content-type": "application/json",
@@ -53,11 +54,12 @@ const History = ({ route }) => {
 
   const fetchBookDetails = (book_id) => {
     const params = { book_id: book_id };
-    const apiUrl =
-      "https://uvers.ciptainovasidigitalia.com/api/book/get_book_detail?" +
-      new URLSearchParams(params);
+    const apiUrlBookDetail = `${apiUrl}book/get_book_detail?${new URLSearchParams(
+      params
+    ).toString()}`;
+
     return new Promise((resolve, reject) => {
-      fetch(apiUrl)
+      fetch(apiUrlBookDetail)
         .then((response) => response.json())
         .then((data) => {
           resolve(data.data.book_lists);

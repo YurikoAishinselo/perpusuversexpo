@@ -86,7 +86,9 @@ const Profile = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
-          onPress={() => navigation.navigate("Change Password")}
+          onPress={() =>
+            navigation.navigate("Change Password", { user_token: user_token })
+          }
         >
           <View style={styles.profileMenu}>
             <Image
@@ -97,7 +99,7 @@ const Profile = ({ navigation, route }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.profileMenuContainer}
           onPress={() => navigation.navigate("Splash")}
         >
@@ -108,7 +110,7 @@ const Profile = ({ navigation, route }) => {
             ></Image>
             <Text style={styles.menuText}>About</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
   },
 
   profileMenuContainer: {
-    marginTop: responsiveHeight(2),
+    marginTop: responsiveHeight(4.5),
     marginRight: responsiveWidth(8),
     marginLeft: responsiveWidth(8),
     alignItems: "flex-start",
@@ -168,7 +170,7 @@ const styles = StyleSheet.create({
   profileMenu: {
     alignItems: "center",
     flexDirection: "row",
-    marginTop: responsiveHeight(1),
+    // marginTop: responsiveHeight(1),
   },
 
   iconMenu: {

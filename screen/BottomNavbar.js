@@ -110,12 +110,12 @@ const BottomNavbar = ({ route }) => {
           <Tab.Screen
             name="Home"
             component={Home}
-            initialParams={{ user_id, user_data_name }}
+            initialParams={{ user_id, user_data_name, user_token }}
           />
           <Tab.Screen
             name="My Books"
             component={MyBooks}
-            initialParams={{ user_id }}
+            initialParams={{ user_id, user_token }}
           />
           <Tab.Screen
             name="Profile"

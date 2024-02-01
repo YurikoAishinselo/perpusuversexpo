@@ -14,14 +14,13 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
-
+import apiUrl from "../Data/ApiUrl";
 import booksData from "../Data/BookData.json";
 import { useFocusEffect } from "@react-navigation/native";
 
 const MyBook = ({ navigation, route }) => {
-  const bearerToken = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
   const [bookData, setBookData] = useState([]);
-  const { user_id } = route.params;
+  const { user_id, user_token } = route.params;
   const [loading, setLoading] = useState(true);
   const pageName = "My Books";
   const books = booksData.booksList;
@@ -37,11 +36,11 @@ const MyBook = ({ navigation, route }) => {
   }, [navigation]);
 
   const fetchMyBook = () => {
-    fetch("https://uvers.ciptainovasidigitalia.com/api/user/get_book_list", {
+    fetch(apiUrl + "user/get_book_list", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${user_token}`,
       },
     })
       .then((response) => response.json())
@@ -62,6 +61,7 @@ const MyBook = ({ navigation, route }) => {
           navigation.navigate("Book Details", {
             bookIds: book.id,
             user_id: user_id,
+            user_token: user_token,
           });
         }}
       >
@@ -76,7 +76,7 @@ const MyBook = ({ navigation, route }) => {
             <Text style={styles.bookTitle}>{book.name}</Text>
             <Text style={styles.bookAuthor}>{book.author}</Text>
             <Text style={styles.bookAuthor}>
-              Dipinjam: {book.pivot.borrowed_date}
+              Dipinjam : {book.pivot.borrowed_date}
             </Text>
             <View style={styles.bookRating}>
               <Image
@@ -108,7 +108,7 @@ const MyBook = ({ navigation, route }) => {
           <View style={styles.emptyArea}></View>
         </ScrollView>
       ) : (
-        <Text>You don't have borrowed book!</Text>
+        <Text style={style.emptyBooksText}>You don't have borrowed book!</Text>
       )}
     </ImageBackground>
   );
@@ -188,6 +188,10 @@ const styles = StyleSheet.create({
   ratingText: {
     marginLeft: responsiveWidth(0.8),
     fontSize: responsiveFontSize(2.1),
+  },
+  emptyBooksText: {
+    alignItems: "center",
+    textAlign: "center",
   },
 });
 

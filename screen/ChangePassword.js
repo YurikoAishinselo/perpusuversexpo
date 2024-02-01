@@ -16,8 +16,9 @@ import {
   responsiveWidth,
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
+import apiUrl from "../Data/ApiUrl";
 
-const ChangePassword = ({ navigation }) => {
+const ChangePassword = ({ navigation, route }) => {
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
     useState(false);
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
@@ -26,9 +27,9 @@ const ChangePassword = ({ navigation }) => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
+  const { user_token } = route.params;
 
   const submitNewPassword = async () => {
-    const token = "4|0xn174fhroNjEf4auUVWsHCzAfHxsY41enpYGRYG";
     const parameter = {
       current_password: currentPassword,
       new_password: newPassword,
@@ -36,13 +37,12 @@ const ChangePassword = ({ navigation }) => {
     };
 
     try {
-      const apiUrl =
-        "https://uvers.ciptainovasidigitalia.com/api/user/change_password";
-      let response = await fetch(apiUrl, {
+      const Url = apiUrl + "user/change_password";
+      let response = await fetch(Url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user_token}`,
         },
         body: JSON.stringify(parameter),
       });
