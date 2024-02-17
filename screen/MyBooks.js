@@ -22,8 +22,6 @@ const MyBook = ({ navigation, route }) => {
   const [bookData, setBookData] = useState([]);
   const { user_id, user_token } = route.params;
   const [loading, setLoading] = useState(true);
-  const pageName = "My Books";
-  const books = booksData.booksList;
 
   useEffect(() => {
     const focusListener = navigation.addListener("focus", () => {
@@ -68,13 +66,15 @@ const MyBook = ({ navigation, route }) => {
         <View style={styles.bookCard} key={book.id}>
           <View style={styles.bookImagePosition}>
             <Image
-              source={require("../assets/BookAsset/book2.png")}
+              source={{
+                uri: `http://cidia.my.id/storage/${book.cover_path}`,
+              }}
               style={styles.bookImage}
             />
           </View>
           <View style={styles.bookInfo}>
             <Text style={styles.bookTitle}>{book.name}</Text>
-            <Text style={styles.bookAuthor}>{book.author}</Text>
+            <Text style={styles.bookAuthor}>{book.writer}</Text>
             <Text style={styles.bookAuthor}>
               Dipinjam : {book.pivot.borrowed_date}
             </Text>
@@ -108,7 +108,7 @@ const MyBook = ({ navigation, route }) => {
           <View style={styles.emptyArea}></View>
         </ScrollView>
       ) : (
-        <Text style={style.emptyBooksText}>You don't have borrowed book!</Text>
+        <Text style={styles.emptyBooksText}>You don't have borrowed book!</Text>
       )}
     </ImageBackground>
   );

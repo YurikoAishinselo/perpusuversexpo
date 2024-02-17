@@ -9,14 +9,9 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Modal,
-  TouchableWithoutFeedback,
-  Keyboard,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
-import { RadioButton } from "react-native-paper"; // Import RadioButton from react-native-paper
-// import { KeyboardAvoidingView } from "react-native";
-
 import {
   responsiveHeight,
   responsiveWidth,
@@ -43,38 +38,24 @@ const Home = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchInfo();
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setIsKeyboardOpen(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setIsKeyboardOpen(false);
-      }
-    );
   }, []);
 
   const fetchInfo = async () => {
-    {
-      try {
-        let result = await fetch(apiUrl + "book/get_book_list");
-        result = await result.json();
-        setBookLists(result.data.book_lists);
-      } catch (e) {
-        console.error("error", e);
-      } finally {
-        setIsLoading(false);
-      }
+    try {
+      let result = await fetch(apiUrl + "book/get_book_list");
+      result = await result.json();
+      setBookLists(result.data.book_lists);
+    } catch (e) {
+      console.error("error", e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  function renderBookCard(book) {
+  const renderBookCard = (book) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     const lowerCaseTitle = book.name.toLowerCase();
-    const lowerCaseAuthor = book.author.toLowerCase();
+    const lowerCaseAuthor = book.writer.toLowerCase();
     const isMatch =
       lowerCaseTitle.includes(lowerCaseQuery) ||
       lowerCaseAuthor.includes(lowerCaseQuery);
@@ -98,93 +79,81 @@ const Home = ({ navigation, route }) => {
         <View style={styles.inner}>
           <Image
             style={styles.bookImage}
-            source={require("../assets/BookAsset/book1.png")}
+            source={{
+              uri: `http://cidia.my.id/storage/${book.cover_path}`,
+            }}
           />
         </View>
         <Text style={styles.textJudul} numberOfLines={1}>
           {book.name}{" "}
         </Text>
-        <Text style={styles.textPenulis}>{book.author}</Text>
+        <Text style={styles.textPenulis}>{book.writer}</Text>
       </TouchableOpacity>
     );
-  }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={require("../assets/PublicAsset/defaultBackground.png")}
-        style={styles.backgroundImage}
-      >
-        <ScrollView>
-          {/* Header */}
-          <View style={styles.headerContainer}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.textHello}>Hello</Text>
-              <Text
-                style={{
-                  fontSize:
-                    jumlahHuruf > 10
-                      ? responsiveFontSize(2.5)
-                      : responsiveFontSize(3),
-                  fontWeight: "bold",
-                  color: "#000000",
-                }}
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <ImageBackground
+          source={require("../assets/PublicAsset/defaultBackground.png")}
+          style={styles.backgroundImage}
+        >
+          <ScrollView>
+            <View style={styles.headerContainer}>
+              <View style={styles.leftColumn}>
+                <Text style={styles.textHello}>Hello</Text>
+                <Text
+                  style={{
+                    fontSize:
+                      jumlahHuruf > 10
+                        ? responsiveFontSize(2.5)
+                        : responsiveFontSize(3),
+                    fontWeight: "bold",
+                    color: "#000000",
+                  }}
+                >
+                  {namaPertama}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.rightColumn}
+                onPress={() =>
+                  navigation.navigate("Personal Information", {
+                    user_token: user_token,
+                  })
+                }
               >
-                {namaPertama}
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.rightColumn}
-              onPress={() => navigation.navigate("Personal Information")}
-            >
-              <Image
-                style={styles.profileImage}
-                source={require("../assets/homeAsset/photoProfile.png")}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.searchContent}>
-            <View style={styles.searchBar}>
-              <TouchableOpacity>
                 <Image
-                  style={styles.searchIcon}
-                  source={require("../assets/homeAsset/searchIcon.png")}
+                  style={styles.profileImage}
+                  source={require("../assets/defaultPhotoProfile.png")}
                 />
               </TouchableOpacity>
-              <TextInput
-                style={styles.input}
-                placeholder="Search Books"
-                value={searchQuery}
-                onChangeText={(text) => setSearchQuery(text)}
-              />
             </View>
-            {/* <TouchableOpacity
-              style={styles.sortMenu}
-              onPress={() => setIsSortMenuVisible(true)}
-            >
-              <Image
-                style={styles.sortIcon}
-                source={require("../assets/homeAsset/filterIcon.png")}
-              />
-            </TouchableOpacity> */}
-          </View>
 
-          <View style={styles.boxContent}>
-            {isLoading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : bookLists && bookLists.length > 0 ? (
-              bookLists.map((book) => renderBookCard(book))
-            ) : (
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  // backgroundColor: "#ff0000",
-                  height: responsiveHeight(30),
-                }}
-              >
+            <View style={styles.searchContent}>
+              <View style={styles.searchBar}>
+                <TouchableOpacity>
+                  <Image
+                    style={styles.searchIcon}
+                    source={require("../assets/homeAsset/searchIcon.png")}
+                  />
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Search Books"
+                  value={searchQuery}
+                  onChangeText={(text) => setSearchQuery(text)}
+                />
+              </View>
+            </View>
+
+            <View style={styles.boxContent}>
+              {isLoading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : bookLists && bookLists.length > 0 ? (
+                bookLists.map((book) => renderBookCard(book))
+              ) : (
                 <Text
                   style={{
                     textAlign: "center",
@@ -193,13 +162,13 @@ const Home = ({ navigation, route }) => {
                 >
                   Book is empty!
                 </Text>
-              </View>
-            )}
-          </View>
-        </ScrollView>
-        <View style={styles.emptyArea}></View>
-      </ImageBackground>
-    </SafeAreaView>
+              )}
+            </View>
+          </ScrollView>
+          <View style={styles.emptyArea}></View>
+        </ImageBackground>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -212,25 +181,22 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-
-  //header
   headerContainer: {
     marginTop: responsiveHeight(2),
-    flexDirection: "row", // Horizontally align elements
+    flexDirection: "row",
     height: responsiveHeight(15),
-    // backgroundColor: '#00FF00',
   },
   leftColumn: {
     marginVertical: responsiveHeight(5),
     marginHorizontal: responsiveWidth(6),
-    flex: 1, // Occupy 1/2 of the row space
-    justifyContent: "center", // Vertically center elements
-    alignItems: "flex-start", // Align items to the start (left)
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
   rightColumn: {
-    flex: 1, // Occupy 1/2 of the row space
-    justifyContent: "center", // Vertically center elements
-    alignItems: "flex-end", // Align items to the end (right)
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "flex-end",
     marginVertical: responsiveHeight(5),
     marginHorizontal: responsiveWidth(7),
   },
@@ -241,19 +207,16 @@ const styles = StyleSheet.create({
   profileImage: {
     height: responsiveWidth(20),
     width: responsiveWidth(20),
-    borderRadius: 50, // To make the image round
+    borderRadius: 50,
   },
-
-  //SearchBar
   searchContent: {
     marginTop: responsiveHeight(2),
-    // backgroundColor: '#000000',
     height: responsiveHeight(8),
     flexDirection: "row",
     justifyContent: "center",
   },
   searchBar: {
-    flex: 0.9, // Reduce the flex value to make it smaller
+    flex: 0.9,
     height: responsiveHeight(6),
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 10,
@@ -280,33 +243,7 @@ const styles = StyleSheet.create({
     marginLeft: responsiveWidth(3),
     fontSize: 20,
   },
-  sortMenu: {
-    flex: 0.13, // Reduce the flex value to adjust the size
-    height: responsiveHeight(6),
-    backgroundColor: "#128CFC",
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopRightRadius: 10,
-    borderBottomRightRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-
-    elevation: 5,
-  },
-  searchIcon: {
-    width: responsiveWidth(5),
-    height: responsiveWidth(5),
-    marginLeft: responsiveWidth(3),
-  },
-  sortIcon: {
-    width: responsiveWidth(5),
-    height: responsiveWidth(5),
-  },
-
-  //Book Content
   boxContent: {
-    // backgroundColor: '#ff0000',
     flex: 1,
     alignSelf: "stretch",
     flexDirection: "row",
@@ -317,7 +254,6 @@ const styles = StyleSheet.create({
     width: "50%",
     height: responsiveHeight(32),
     padding: 20,
-    // backgroundColor: '#ffff00',
   },
   inner: {
     flex: 1,
@@ -333,7 +269,6 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
     color: "#878D92",
   },
-
   textJudul: {
     fontSize: responsiveFontSize(2),
     marginTop: responsiveHeight(1),
@@ -345,8 +280,6 @@ const styles = StyleSheet.create({
     width: responsiveHeight(11.9),
     borderRadius: responsiveHeight(0.5),
   },
-
-  // Pop up menu
   sortMenuContainer: {
     position: "absolute",
     top: "50%",
@@ -369,6 +302,11 @@ const styles = StyleSheet.create({
       { translateY: -responsiveHeight(12.5) },
     ],
   },
+  searchIcon: {
+    width: responsiveWidth(5),
+    height: responsiveWidth(5),
+    marginLeft: responsiveWidth(3),
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -378,12 +316,10 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
     marginBottom: responsiveHeight(1),
   },
-
   radioButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   radioButtonText: {
     marginRight: responsiveWidth(32),
   },

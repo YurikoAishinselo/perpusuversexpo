@@ -52,7 +52,7 @@ const BookDetail = ({ route, navigation }) => {
         let result = await fetch(Url);
         result = await result.json();
         setBookDetail(result.data.book_lists);
-        setCurrentStock(result.data.book_lists.stock);
+        setCurrentStock(result.data.book_lists.stock_left);
       } catch (e) {
         console.error("error", e);
       } finally {
@@ -72,8 +72,6 @@ const BookDetail = ({ route, navigation }) => {
     bookRating,
     bookSynopsisContent,
   } = firstBook;
-
-  const bookImagePath = require("../assets/BookAsset/book1.png");
 
   const checkIsBorrowed = () => {
     const apiUrlBorrowed = apiUrl + "user/get_book_list";
@@ -139,6 +137,8 @@ const BookDetail = ({ route, navigation }) => {
                 throw new Error("Bad Request");
               case 500:
                 throw new Error("Bad Server 200");
+              default:
+                throw new Error("Unknown error!");
             }
           }
           return response.json();
@@ -146,7 +146,6 @@ const BookDetail = ({ route, navigation }) => {
         .then((json) => {
           console.log(json.data.file_url);
           setDownloadUrl(json.data.file_url);
-          setIsBorrowed(true);
           setCurrentStock(currentStock - 1);
           setIsDownloading(true);
           downloadFile(json.data.file_url);
@@ -260,21 +259,31 @@ const BookDetail = ({ route, navigation }) => {
 
     return resultLines.join("\n");
   };
+  // const handleReadMore = () => {
+  //   setShowFullSynopsis(!showFullSynopsis);
+  // };
+
+  // const maxLinesToShow = 4; // Set the maximum number of lines to show
 
   const downloadFile = async (downloadUrl) => {
     const fileName = bookIds;
-    const fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
+    let fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
     const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
     if (!fileInfo.exists) {
-      FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
-        .then(({ uri }) => {
-          console.log(`Book downloaded successfully in ${uri}`);
-        })
-        .catch((e) =>
-          Alert.alert("Download failed", e.message || "Unknown error")
-        )
-        .finally(() => setIsDownloading(false));
+    } else {
+      fileDownloadPath = FileSystem.documentDirectory + fileName + 2 + ".pdf";
     }
+    FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+      .then(({ uri }) => {
+        console.log(`Book downloaded successfully in ${uri}`);
+      })
+      .catch((e) =>
+        Alert.alert("Download failed", e.message || "Unknown error")
+      )
+      .finally(() => {
+        setIsDownloading(false);
+        setIsBorrowed(true);
+      });
   };
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -309,7 +318,12 @@ const BookDetail = ({ route, navigation }) => {
         <ScrollView>
           <View style={styles.bookCenterContent}>
             <View style={styles.box}>
-              <Image source={bookImagePath} style={styles.bookImage} />
+              <Image
+                source={{
+                  uri: `http://cidia.my.id/storage/${bookDetail.cover_path}`,
+                }}
+                style={styles.bookImage}
+              />
             </View>
             <View style={styles.bookInfo}>
               <Text
@@ -327,95 +341,95 @@ const BookDetail = ({ route, navigation }) => {
               >
                 {splitTitleIntoLines(bookDetail.name, 25)}
               </Text>
-              <Text style={styles.bookAuthor}>{bookDetail.author}</Text>
+              <Text style={styles.bookAuthor}>{bookDetail.writer}</Text>
               <Text style={styles.bookAuthor}>new Rating : {newRating} </Text>
               <Text
                 style={[
                   styles.bookStock,
-                  { color: bookDetail.stock > 0 ? "#128CFC" : "#FC1212" },
+                  { color: currentStock > 0 ? "#128CFC" : "#FC1212" },
                 ]}
               >
-                Stok : {currentStock}/{bookStock}
+                Stok : {currentStock}/{bookDetail.stock}
               </Text>
             </View>
-            <View style={styles.bookSynopsis}>
-              <TouchableOpacity
-                style={styles.ratingContainer}
-                onPress={handleRatingPress}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.ratingMessage}>Book Rating</Text>
-                <View style={styles.starContainer}>
-                  {[...Array(bookRating).keys()].map((index) => (
-                    <Image
-                      key={index}
-                      source={require("../assets/PublicAsset/fillStar.png")}
-                      style={styles.starImage}
-                    />
-                  ))}
-                  {[...Array(5 - bookRating).keys()].map((index) => (
-                    <Image
-                      key={index + bookDetail.rating}
-                      source={require("../assets/PublicAsset/blackOutlineStar.png")}
-                      style={styles.starImage}
-                    />
-                  ))}
-                </View>
-              </TouchableOpacity>
-
-              <Modal
-                isVisible={isModalVisible}
-                animationIn="slideInUp"
-                animationOut="slideOutDown"
-                onBackdropPress={handleBackdropPress}
-              >
-                <View style={styles.ratingModalContainer}>
-                  <View style={styles.whiteContainer}>
-                    <Text style={styles.ratingModalTitle}>Rate this Book</Text>
-                    <View style={styles.starModalContainer}>
-                      {[1, 2, 3, 4, 5].map((starCount) => (
-                        <TouchableOpacity
-                          key={starCount}
-                          onPress={() => handleStarPress(starCount)}
-                        >
-                          <Image
-                            source={require("../assets/PublicAsset/filledStar.png")}
-                            style={[
-                              styles.starImageModal,
-                              {
-                                tintColor:
-                                  starCount <= selectedStars
-                                    ? "#FFD700"
-                                    : "#D3D3D3",
-                              },
-                            ]}
-                          />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                    <TouchableOpacity
-                      style={styles.submitRatingButton}
-                      onPress={submitRating}
-                    >
-                      <Text style={styles.submitRatingButtonText}>Submit</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Modal>
-              <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
-              <View style={styles.bookSynopsisContentContainer}>
-                <Text
-                  style={styles.bookSynopsisContent}
-                  numberOfLines={showFullSynopsis ? undefined : 4}
-                >
-                  {bookDetail.synopsis}
-                </Text>
-                {!showFullSynopsis && (
-                  <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
-                    <Text style={styles.readMoreLink}>Read More</Text>
-                  </TouchableOpacity>
-                )}
+          </View>
+          <View style={styles.bookSynopsis}>
+            <TouchableOpacity
+              style={styles.ratingContainer}
+              onPress={handleRatingPress}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.ratingMessage}>Book Rating</Text>
+              <View style={styles.starContainer}>
+                {[...Array(bookRating).keys()].map((index) => (
+                  <Image
+                    key={index}
+                    source={require("../assets/PublicAsset/fillStar.png")}
+                    style={styles.starImage}
+                  />
+                ))}
+                {[...Array(5 - bookRating).keys()].map((index) => (
+                  <Image
+                    key={index + bookDetail.rating}
+                    source={require("../assets/PublicAsset/blackOutlineStar.png")}
+                    style={styles.starImage}
+                  />
+                ))}
               </View>
+            </TouchableOpacity>
+
+            <Modal
+              isVisible={isModalVisible}
+              animationIn="slideInUp"
+              animationOut="slideOutDown"
+              onBackdropPress={handleBackdropPress}
+            >
+              <View style={styles.ratingModalContainer}>
+                <View style={styles.whiteContainer}>
+                  <Text style={styles.ratingModalTitle}>Rate this Book</Text>
+                  <View style={styles.starModalContainer}>
+                    {[1, 2, 3, 4, 5].map((starCount) => (
+                      <TouchableOpacity
+                        key={starCount}
+                        onPress={() => handleStarPress(starCount)}
+                      >
+                        <Image
+                          source={require("../assets/PublicAsset/filledStar.png")}
+                          style={[
+                            styles.starImageModal,
+                            {
+                              tintColor:
+                                starCount <= selectedStars
+                                  ? "#FFD700"
+                                  : "#D3D3D3",
+                            },
+                          ]}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TouchableOpacity
+                    style={styles.submitRatingButton}
+                    onPress={submitRating}
+                  >
+                    <Text style={styles.submitRatingButtonText}>Submit</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+            <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
+            <View style={styles.bookSynopsisContentContainer}>
+              <Text
+                style={styles.bookSynopsisContent}
+                numberOfLines={showFullSynopsis ? undefined : 4}
+              >
+                {bookDetail.synopsis}
+              </Text>
+              {!showFullSynopsis && (
+                <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
+                  <Text style={styles.readMoreLink}>Read More</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <View style={styles.actionsContainer}>
@@ -494,6 +508,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   boxContent: {
+    backgroundColor: "#00ff00",
+
     marginTop: responsiveHeight(5),
   },
   bookCenterContent: {
@@ -503,7 +519,6 @@ const styles = StyleSheet.create({
     marginTop: responsiveHeight(1),
     width: responsiveWidth(43),
     height: responsiveHeight(26),
-    padding: 20,
     backgroundColor: "#FFFFFF",
     borderRadius: responsiveWidth(2),
     alignItems: "center",
@@ -581,12 +596,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bookSynopsis: {
+    // backgroundColor: "#ff0000",
     textAlign: "left",
-    padding: responsiveWidth(5),
+    padding: responsiveWidth(8),
   },
   bookSynopsisTitle: {
     marginTop: responsiveHeight(2),
-    // backgroundColor: "#ff0000",
     fontSize: responsiveFontSize(2.3),
     fontWeight: "bold",
   },

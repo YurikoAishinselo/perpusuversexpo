@@ -1,3 +1,3 @@
-const apiUrl = "https://uvers.duniatopup.id/api/";
+const apiUrl = "http://cidia.my.id/api/";
 
 export default apiUrl;

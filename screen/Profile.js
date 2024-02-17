@@ -26,7 +26,7 @@ const Profile = ({ navigation, route }) => {
       <ScrollView>
         <View style={styles.userProfil}>
           <Image
-            source={require("../assets/ProfileAsset/profilImage.jpg")}
+            source={require("../assets/defaultPhotoProfile.png")}
             style={styles.imageSize}
           ></Image>
           <Text style={styles.nameText}>{user_data_name}</Text>
@@ -36,7 +36,9 @@ const Profile = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles.profileMenuContainer}
           onPress={() =>
-            navigation.navigate("Personal Information", { user_id: user_id })
+            navigation.navigate("Personal Information", {
+              user_token: user_token,
+            })
           }
         >
           <View style={styles.profileMenu}>
@@ -48,7 +50,7 @@ const Profile = ({ navigation, route }) => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.profileMenuContainer}
           onPress={() =>
             navigation.navigate("Wishlist", {
@@ -64,7 +66,7 @@ const Profile = ({ navigation, route }) => {
             ></Image>
             <Text style={styles.menuText}>Wishlist</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={styles.profileMenuContainer}
@@ -138,20 +140,20 @@ const styles = StyleSheet.create({
   },
 
   userProfil: {
-    marginTop: responsiveHeight(1),
+    // marginTop: responsiveHeight(1),
     alignItems: "center",
   },
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(18),
-    width: responsiveHeight(18),
+    height: responsiveHeight(25),
+    width: responsiveHeight(25),
   },
 
   nameText: {
     fontSize: responsiveFontSize(3.5),
     fontWeight: "bold",
-    marginTop: responsiveHeight(3),
+    marginTop: responsiveHeight(1),
   },
 
   emailText: {

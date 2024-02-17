@@ -7,6 +7,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import {
   responsiveHeight,
@@ -17,18 +18,14 @@ import * as ImagePicker from "expo-image-picker";
 import apiUrl from "../Data/ApiUrl";
 
 const PersonalInformation = ({ navigation, route }) => {
-  const profileName = "Tommy Theonanda";
-  const profileEmail = "theonanda.tom@gmail.com";
-  const profileNIM = "2021133001";
-  const profilFakultas = "Komputer";
-  const profilJurusan = "Teknik Perangkat Lunak";
-  const profilAngkatan = "2021";
+  let profilFakultas = "";
   const [imageSource, setImageSource] = useState(
     "../assets/ProfileAsset/profilImage.jpg"
   );
 
   const [profile, SetProfile] = useState("");
-  const { user_id, user_data, user_token } = route.params;
+  const [isLoading, SetIsLoading] = useState(true);
+  const { user_token } = route.params;
   useEffect(() => {
     fetchMyProfile();
   }, []);
@@ -42,7 +39,31 @@ const PersonalInformation = ({ navigation, route }) => {
       },
     })
       .then((response) => response.json())
-      .then((data) => SetProfile(data.data))
+      .then((data) => {
+        SetProfile(data.data);
+        console.log("Username", data.data.username[5]);
+        switch (data.data.username[5]) {
+          case "1":
+            profilFakultas = "Seni";
+            break;
+          case 2:
+            profilFakultas = "Bisnis";
+            break;
+          case "3":
+            profilFakultas = "Komputer";
+            break;
+          case 4:
+            profilFakultas = "Teknik";
+            break;
+          case 5:
+            profilFakultas = "Pendidikan";
+            break;
+          default:
+            profilFakultas = "Other";
+        }
+
+        SetIsLoading(false);
+      })
       .catch((e) => console.error(e));
   };
 
@@ -64,53 +85,56 @@ const PersonalInformation = ({ navigation, route }) => {
       source={require("../assets/PublicAsset/defaultBackground.png")}
       style={styles.backgroundImage}
     >
-      <ScrollView>
-        <View style={styles.userProfile}>
-          <View style={styles.profileImageContainer}>
-            <Image source={{ uri: imageSource }} style={styles.imageSize} />
-            <TouchableOpacity
-              style={styles.editIconContainer}
-              onPress={uploadPhoto}
-            >
+      {!isLoading ? (
+        <ScrollView>
+          <View style={styles.userProfile}>
+            <View style={styles.profileImageContainer}>
               <Image
-                source={require("../assets/PublicAsset/editIcon.png")}
-                style={styles.editIcon}
+                source={require("../assets/defaultPhotoProfile.png")}
+                style={styles.imageSize}
               />
-            </TouchableOpacity>
+              {/* <TouchableOpacity
+                style={styles.editIconContainer}
+                onPress={uploadPhoto}
+              >
+                <Image
+                  source={require("../assets/PublicAsset/editIcon.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity> */}
+            </View>
+            <Text style={styles.nameText}>{profile.name}</Text>
+            <Text style={styles.emailText}>{profile.email}</Text>
           </View>
-          <Text style={styles.nameText}>
-            {profile === null ? "Loading..." : profile.name}
-          </Text>
-          <Text style={styles.emailText}>
-            {profile === null ? "Loading..." : profile.email}
-          </Text>
-        </View>
 
-        <View style={styles.profilePersonalInformation}>
-          <Text style={styles.profileTitleText}>NIM</Text>
-          <Text style={styles.profileDataText}>{profileNIM}</Text>
-        </View>
+          <View style={styles.profilePersonalInformation}>
+            <Text style={styles.profileTitleText}>NIM</Text>
+            <Text style={styles.profileDataText}>{profile.username}</Text>
+          </View>
 
-        <View style={styles.profilePersonalInformation}>
-          <Text style={styles.profileTitleText}>Nama Lengkap</Text>
-          <Text style={styles.profileDataText}>{profileName}</Text>
-        </View>
+          <View style={styles.profilePersonalInformation}>
+            <Text style={styles.profileTitleText}>Nama Lengkap</Text>
+            <Text style={styles.profileDataText}>{profile.name}</Text>
+          </View>
 
-        <View style={styles.profilePersonalInformation}>
-          <Text style={styles.profileTitleText}>Fakultas</Text>
-          <Text style={styles.profileDataText}>{profilFakultas}</Text>
-        </View>
+          {/* <View style={styles.profilePersonalInformation}>
+            <Text style={styles.profileTitleText}>Fakultas</Text>
+            <Text style={styles.profileDataText}>{profilFakultas}</Text>
+          </View> */}
 
-        <View style={styles.profilePersonalInformation}>
-          <Text style={styles.profileTitleText}>Jurusan</Text>
-          <Text style={styles.profileDataText}>{profilJurusan}</Text>
-        </View>
+          <View style={styles.profilePersonalInformation}>
+            <Text style={styles.profileTitleText}>Jurusan</Text>
+            <Text style={styles.profileDataText}>{profile.major}</Text>
+          </View>
 
-        <View style={styles.profilePersonalInformation}>
-          <Text style={styles.profileTitleText}>Angkatan</Text>
-          <Text style={styles.profileDataText}>{profilAngkatan}</Text>
-        </View>
-      </ScrollView>
+          <View style={styles.profilePersonalInformation}>
+            <Text style={styles.profileTitleText}>Angkatan</Text>
+            <Text style={styles.profileDataText}>{profile.generation}</Text>
+          </View>
+        </ScrollView>
+      ) : (
+        <ActivityIndicator size="large" color="#0000ff" />
+      )}
     </ImageBackground>
   );
 };
@@ -124,7 +148,7 @@ const styles = StyleSheet.create({
   },
 
   userProfile: {
-    marginTop: responsiveHeight(4),
+    // marginTop: responsiveHeight(4),
     alignItems: "center",
   },
 
@@ -151,14 +175,14 @@ const styles = StyleSheet.create({
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(18),
-    width: responsiveHeight(18),
+    height: responsiveHeight(25),
+    width: responsiveHeight(25),
   },
 
   nameText: {
     fontSize: responsiveFontSize(3.5),
     fontWeight: "bold",
-    marginTop: responsiveHeight(3),
+    // marginTop: responsiveHeight(3),
   },
 
   emailText: {
