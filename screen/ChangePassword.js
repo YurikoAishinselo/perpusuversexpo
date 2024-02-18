@@ -149,7 +149,7 @@ const ChangePassword = ({ navigation, route }) => {
       <ScrollView>
         <View style={styles.changePasswordInputContainer}>
           <Image
-            source={require("../assets/ProfileAsset/profilImage.jpg")}
+            source={require("../assets/defaultPhotoProfile.png")}
             style={styles.imageSize}
           />
           <Text style={styles.titleText}>Change Password</Text>
@@ -243,19 +243,19 @@ const styles = StyleSheet.create({
   },
 
   changePasswordInputContainer: {
-    marginTop: responsiveHeight(3),
+    marginTop: responsiveHeight(1),
     alignItems: "center",
     height: responsiveHeight(80),
   },
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(23),
-    width: responsiveHeight(23),
+    height: responsiveHeight(25),
+    width: responsiveHeight(25),
   },
 
   titleText: {
-    marginTop: responsiveHeight(3),
+    // marginTop: responsiveHeight(3),
     fontSize: responsiveFontSize(4.5),
     fontWeight: "600",
     marginBottom: responsiveHeight(5),
@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: responsiveFontSize(2.4),
     color: "black",
+    paddingRight: responsiveWidth(4),
   },
 
   changeButton: {

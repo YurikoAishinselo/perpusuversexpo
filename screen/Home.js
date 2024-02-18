@@ -18,9 +18,8 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 
-import booksData from "../Data/BookData.json";
-import BottomNavbar from "./BottomNavbar";
 import apiUrl from "../Data/ApiUrl";
+import imageApiUrl from "../Data/imageApiUrl";
 
 const Home = ({ navigation, route }) => {
   const [isSortMenuVisible, setIsSortMenuVisible] = useState(false);
@@ -80,7 +79,7 @@ const Home = ({ navigation, route }) => {
           <Image
             style={styles.bookImage}
             source={{
-              uri: `http://cidia.my.id/storage/${book.cover_path}`,
+              uri: `${imageApiUrl}storage/${book.cover_path}`,
             }}
           />
         </View>
@@ -93,82 +92,80 @@ const Home = ({ navigation, route }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
-        <ImageBackground
-          source={require("../assets/PublicAsset/defaultBackground.png")}
-          style={styles.backgroundImage}
-        >
-          <ScrollView>
-            <View style={styles.headerContainer}>
-              <View style={styles.leftColumn}>
-                <Text style={styles.textHello}>Hello</Text>
-                <Text
-                  style={{
-                    fontSize:
-                      jumlahHuruf > 10
-                        ? responsiveFontSize(2.5)
-                        : responsiveFontSize(3),
-                    fontWeight: "bold",
-                    color: "#000000",
-                  }}
-                >
-                  {namaPertama}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.rightColumn}
-                onPress={() =>
-                  navigation.navigate("Personal Information", {
-                    user_token: user_token,
-                  })
-                }
+    <SafeAreaView style={styles.container}>
+      <ImageBackground
+        source={require("../assets/PublicAsset/defaultBackground.png")}
+        style={styles.backgroundImage}
+      >
+        <ScrollView>
+          <View style={styles.headerContainer}>
+            <View style={styles.leftColumn}>
+              <Text style={styles.textHello}>Hello</Text>
+              <Text
+                style={{
+                  fontSize:
+                    jumlahHuruf > 10
+                      ? responsiveFontSize(2.5)
+                      : responsiveFontSize(3),
+                  fontWeight: "bold",
+                  color: "#000000",
+                }}
               >
+                {namaPertama}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.rightColumn}
+              onPress={() =>
+                navigation.navigate("Personal Information", {
+                  user_token: user_token,
+                })
+              }
+            >
+              <Image
+                style={styles.profileImage}
+                source={require("../assets/defaultPhotoProfile.png")}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.searchContent}>
+            <View style={styles.searchBar}>
+              <TouchableOpacity>
                 <Image
-                  style={styles.profileImage}
-                  source={require("../assets/defaultPhotoProfile.png")}
+                  style={styles.searchIcon}
+                  source={require("../assets/homeAsset/searchIcon.png")}
                 />
               </TouchableOpacity>
+              <TextInput
+                style={styles.input}
+                placeholder="Search Books"
+                value={searchQuery}
+                onChangeText={(text) => setSearchQuery(text)}
+              />
             </View>
+          </View>
 
-            <View style={styles.searchContent}>
-              <View style={styles.searchBar}>
-                <TouchableOpacity>
-                  <Image
-                    style={styles.searchIcon}
-                    source={require("../assets/homeAsset/searchIcon.png")}
-                  />
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Search Books"
-                  value={searchQuery}
-                  onChangeText={(text) => setSearchQuery(text)}
-                />
-              </View>
-            </View>
-
-            <View style={styles.boxContent}>
-              {isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-              ) : bookLists && bookLists.length > 0 ? (
-                bookLists.map((book) => renderBookCard(book))
-              ) : (
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontSize: responsiveFontSize(3),
-                  }}
-                >
-                  Book is empty!
-                </Text>
-              )}
-            </View>
-          </ScrollView>
-          <View style={styles.emptyArea}></View>
-        </ImageBackground>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+          <View style={styles.boxContent}>
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : bookLists && bookLists.length > 0 ? (
+              bookLists.map((book) => renderBookCard(book))
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: responsiveFontSize(3),
+                }}
+              >
+                Book is empty!
+              </Text>
+            )}
+          </View>
+        </ScrollView>
+        <View style={styles.emptyArea}></View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
@@ -178,7 +175,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: "cover",
+    resizeMode: "contain",
     justifyContent: "center",
   },
   headerContainer: {
@@ -229,12 +226,12 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#FFFFFF",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: responsiveHeight(2) },
         shadowOpacity: 0.5,
-        shadowRadius: 10,
+        shadowRadius: responsiveHeight(2),
       },
       android: {
-        elevation: 10,
+        elevation: responsiveHeight(2),
       },
     }),
   },

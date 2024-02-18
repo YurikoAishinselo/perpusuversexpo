@@ -16,11 +16,12 @@ import {
 
 import booksData from "../Data/BookData.json";
 import apiUrl from "../Data/ApiUrl";
-
+import imageApiUrl from "../Data/imageApiUrl";
 const History = ({ route }) => {
   const { user_id, user_token } = route.params;
   const historyBooks = booksData.borrowingHistoryBook;
   const [history, setHistory] = useState([]);
+  const [userHistory, setUserHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -37,9 +38,7 @@ const History = ({ route }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        const getUserHistory = data.data.history_lists.filter(
-          (history) => history.user_id == user_id
-        );
+        const getUserHistory = data.data.history_lists;
 
         getUserHistory.map((history) => {
           fetchBookDetails(history.book_id).then((data) => {
@@ -47,9 +46,8 @@ const History = ({ route }) => {
             setHistory((prevWishList) => [...prevWishList, mergedBook]);
           });
         });
-
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const fetchBookDetails = (book_id) => {
@@ -76,7 +74,7 @@ const History = ({ route }) => {
       <View style={styles.bookCard} key={book.bookId}>
         <View style={styles.bookImagePosition}>
           <Image
-            source={require("../assets/BookAsset/book1.png")}
+            source={{ uri: `${imageApiUrl}storage/${book.cover_path}` }}
             style={styles.bookImage}
           />
         </View>
@@ -85,16 +83,16 @@ const History = ({ route }) => {
           <Text style={styles.bookAuthor} numberOfLines={2}>
             {book.author}
           </Text>
-          <Text style={styles.borrowingDate}>
-            Dipinjam: {book.borrowed_date}
-          </Text>
+          <Text style={styles.borrowingDate}>Dipinjam: {book.borrow_date}</Text>
           <View style={styles.bookRating}>
             <Image
               source={require("../assets/myBookAsset/ratingStarImage.png")}
               style={styles.ratingStar}
             />
             <View>
-              <Text style={styles.ratingText}>5</Text>
+              <Text style={styles.ratingText}>
+                {book.rate === null ? "Tidak dinilai" : book.rate}
+              </Text>
             </View>
           </View>
         </View>

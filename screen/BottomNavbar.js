@@ -45,90 +45,90 @@ const BottomNavbar = ({ route }) => {
 
   return (
     <>
-      {!isKeyboardOpen && (
-        <Tab.Navigator
-          initialRouteName="Home"
-          screenOptions={({ route }) => ({
-            headerShown: route.name === "Home" ? false : true,
-            headerTitleStyle: {
-              fontSize: responsiveFontSize(3),
-            },
-            headerTitleAlign: "center",
-            tabBarStyle: { height: responsiveHeight(8) },
-            tabBarBackground: () => (
-              <Image
-                source={require("../assets/PublicAsset/BottomNavbarImage.png")}
-                style={styles.tabBarImage}
-              />
-            ),
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconSource;
-              if (route.name === "Home") {
-                iconSource = focused
-                  ? require("../assets/PublicAsset/homeIconActive.png")
-                  : require("../assets/PublicAsset/homeIcon.png");
-              } else if (route.name === "My Books") {
-                iconSource = focused
-                  ? require("../assets/PublicAsset/myBookIconActive.png")
-                  : require("../assets/PublicAsset/myBookIcon.png");
-              } else if (route.name === "Profile") {
-                iconSource = focused
-                  ? require("../assets/PublicAsset/profileIconActive.png")
-                  : require("../assets/PublicAsset/profileIcon.png");
-              }
+      <Tab.Navigator
+        initialRouteName="Home"
+        screenOptions={({ route }) => ({
+          tabBarHideOnKeyboard: true,
+          headerShown: route.name === "Home" ? false : true,
+          headerTitleStyle: {
+            fontSize: responsiveFontSize(3),
+          },
+          headerTitleAlign: "center",
+          tabBarStyle: { height: responsiveHeight(8) },
+          tabBarBackground: () => (
+            <Image
+              source={require("../assets/PublicAsset/BottomNavbarImage.png")}
+              style={styles.tabBarImage}
+            />
+          ),
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconSource;
+            if (route.name === "Home") {
+              iconSource = focused
+                ? require("../assets/PublicAsset/homeIconActive.png")
+                : require("../assets/PublicAsset/homeIcon.png");
+            } else if (route.name === "My Books") {
+              iconSource = focused
+                ? require("../assets/PublicAsset/myBookIconActive.png")
+                : require("../assets/PublicAsset/myBookIcon.png");
+            } else if (route.name === "Profile") {
+              iconSource = focused
+                ? require("../assets/PublicAsset/profileIconActive.png")
+                : require("../assets/PublicAsset/profileIcon.png");
+            }
 
-              return (
-                <View
+            return (
+              <View
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  top: responsiveHeight(1.3),
+                  position: "absolute",
+                }}
+              >
+                <Image
+                  source={iconSource}
                   style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    top: responsiveHeight(1.3),
-                    position: "absolute",
+                    width: size,
+                    height: size,
+                  }}
+                />
+                <Text
+                  style={{
+                    color: focused ? "#ffffff" : "#7ABCFF",
+                    fontSize: responsiveFontSize(1.8),
                   }}
                 >
-                  <Image
-                    source={iconSource}
-                    style={{
-                      width: size,
-                      height: size,
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: focused ? "#ffffff" : "#7ABCFF",
-                      fontSize: responsiveFontSize(1.8),
-                    }}
-                  >
-                    {route.name}
-                  </Text>
-                </View>
-              );
-            },
-            tabBarLabel: "",
-          })}
-        >
-          <Tab.Screen
-            name="Home"
-            component={Home}
-            initialParams={{ user_id, user_data_name, user_token }}
-          />
-          <Tab.Screen
-            name="My Books"
-            component={MyBooks}
-            initialParams={{ user_id, user_token }}
-          />
-          <Tab.Screen
-            name="Profile"
-            component={Profile}
-            initialParams={{
-              user_id,
-              user_data_name,
-              user_data_email,
-              user_token,
-            }}
-          />
-        </Tab.Navigator>
-      )}
+                  {route.name}
+                </Text>
+              </View>
+            );
+          },
+          tabBarLabel: "",
+        })}
+      >
+        <Tab.Screen
+          name="Home"
+          component={Home}
+          screenOptions={{}}
+          initialParams={{ user_id, user_data_name, user_token }}
+        />
+        <Tab.Screen
+          name="My Books"
+          component={MyBooks}
+          initialParams={{ user_id, user_token }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={Profile}
+          initialParams={{
+            user_id,
+            user_data_name,
+            user_data_email,
+            user_token,
+          }}
+        />
+      </Tab.Navigator>
     </>
   );
 };

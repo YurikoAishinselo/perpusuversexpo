@@ -15,6 +15,7 @@ import {
   responsiveFontSize,
 } from "react-native-responsive-dimensions";
 import apiUrl from "../Data/ApiUrl";
+import imageApiUrl from "../Data/imageApiUrl";
 import booksData from "../Data/BookData.json";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -67,7 +68,7 @@ const MyBook = ({ navigation, route }) => {
           <View style={styles.bookImagePosition}>
             <Image
               source={{
-                uri: `http://cidia.my.id/storage/${book.cover_path}`,
+                uri: `${imageApiUrl}storage/${book.cover_path}`,
               }}
               style={styles.bookImage}
             />
@@ -76,7 +77,7 @@ const MyBook = ({ navigation, route }) => {
             <Text style={styles.bookTitle}>{book.name}</Text>
             <Text style={styles.bookAuthor}>{book.writer}</Text>
             <Text style={styles.bookAuthor}>
-              Dipinjam : {book.pivot.borrowed_date}
+              Dipinjam : {book.pivot.borrow_date}
             </Text>
             <View style={styles.bookRating}>
               <Image

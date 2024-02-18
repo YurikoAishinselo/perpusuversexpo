@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
 
   profileImageContainer: {
     position: "relative",
-    marginBottom: responsiveHeight(1),
+    // marginBottom: responsiveHeight(1),
   },
 
   editIconContainer: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -20,12 +20,15 @@ import {
 } from "react-native-responsive-dimensions";
 import * as FileSystem from "expo-file-system";
 import apiUrl from "../Data/ApiUrl";
+import imageApiUrl from "../Data/imageApiUrl";
 
 // Import the JSON data
 import booksData from "../Data/BookData.json";
 
 const BookDetail = ({ route, navigation }) => {
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
+  const [synopsisLineNumberMoreThan4, setSynopsisLineNumberMoreThan4] =
+    useState(false);
   const [isBorrowed, setIsBorrowed] = useState(false);
   const [currentStock, setCurrentStock] = useState(0);
   const [downloadUrl, setDownloadUrl] = useState(null);
@@ -39,6 +42,8 @@ const BookDetail = ({ route, navigation }) => {
   const params = {
     book_id: bookIds,
   };
+
+  const Synopsis = useRef();
 
   const Url = apiUrl + "book/get_book_detail?" + new URLSearchParams(params);
 
@@ -57,6 +62,9 @@ const BookDetail = ({ route, navigation }) => {
         console.error("error", e);
       } finally {
         setLoading(false);
+        setSynopsisLineNumberMoreThan4(
+          Synopsis.current.props.numberOfLines > 4 ? true : false
+        );
       }
     }
   };
@@ -105,6 +113,7 @@ const BookDetail = ({ route, navigation }) => {
           setIsBorrowed(true);
         } else {
           setIsBorrowed(false);
+          deleteFile(bookIds);
         }
 
         fetchInfo();
@@ -215,8 +224,11 @@ const BookDetail = ({ route, navigation }) => {
         .then((json) => {
           setIsBorrowed(false);
           setCurrentStock(parseInt(currentStock) + 1);
-          Alert.alert("Success", "You have successfully returned the book");
+          return deleteFile(bookIds);
         })
+        .then(() =>
+          Alert.alert("Success", "You have successfully returned the book")
+        )
         .catch((e) => console.error(e));
     } else {
       Alert.alert("Alert", "You haven't borrowed the book yet");
@@ -270,20 +282,35 @@ const BookDetail = ({ route, navigation }) => {
     let fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
     const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
     if (!fileInfo.exists) {
+      FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+        .then(({ uri }) => {
+          console.log(`Book downloaded successfully in ${uri}`);
+        })
+        .catch((e) =>
+          Alert.alert("Download failed", e.message || "Unknown error")
+        )
+        .finally(() => {
+          setIsDownloading(false);
+          setIsBorrowed(true);
+        });
     } else {
-      fileDownloadPath = FileSystem.documentDirectory + fileName + 2 + ".pdf";
     }
-    FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
-      .then(({ uri }) => {
-        console.log(`Book downloaded successfully in ${uri}`);
+  };
+
+  const deleteFile = (bookId) => {
+    const filePath = FileSystem.documentDirectory + bookId + ".pdf";
+    FileSystem.getInfoAsync(filePath)
+      .then((fileInfo) => {
+        if (fileInfo.exists) {
+          return FileSystem.deleteAsync(filePath);
+        } else {
+          console.log("File does not exist!");
+        }
       })
-      .catch((e) =>
-        Alert.alert("Download failed", e.message || "Unknown error")
-      )
-      .finally(() => {
-        setIsDownloading(false);
-        setIsBorrowed(true);
-      });
+      .then(() => {
+        console.log("File deleted successfully!");
+      })
+      .catch((e) => console.error("Error deleting file, " + e));
   };
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -320,7 +347,7 @@ const BookDetail = ({ route, navigation }) => {
             <View style={styles.box}>
               <Image
                 source={{
-                  uri: `http://cidia.my.id/storage/${bookDetail.cover_path}`,
+                  uri: `${imageApiUrl}storage/${bookDetail.cover_path}`,
                 }}
                 style={styles.bookImage}
               />
@@ -420,12 +447,13 @@ const BookDetail = ({ route, navigation }) => {
             <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
             <View style={styles.bookSynopsisContentContainer}>
               <Text
+                ref={Synopsis}
                 style={styles.bookSynopsisContent}
                 numberOfLines={showFullSynopsis ? undefined : 4}
               >
                 {bookDetail.synopsis}
               </Text>
-              {!showFullSynopsis && (
+              {!showFullSynopsis && synopsisLineNumberMoreThan4 && (
                 <TouchableOpacity onPress={() => setShowFullSynopsis(true)}>
                   <Text style={styles.readMoreLink}>Read More</Text>
                 </TouchableOpacity>
@@ -454,14 +482,14 @@ const BookDetail = ({ route, navigation }) => {
                   handleBorrowNow();
                 }
               }}
-              disabled={bookDetail.stock === 0 && !isBorrowed}
+              disabled={currentStock === 0 && !isBorrowed}
             >
               <Text style={styles.buttonText}>
                 {isBorrowed
                   ? "Read Now"
                   : isDownloading
                   ? "Downloading..."
-                  : bookDetail.stock === 0
+                  : currentStock === 0
                   ? "Out of Stock"
                   : "Borrow Now"}
               </Text>
@@ -472,7 +500,7 @@ const BookDetail = ({ route, navigation }) => {
                 styles.notifyButton,
                 {
                   backgroundColor:
-                    bookDetail.stock === 0 && !isBorrowed
+                    currentStock === 0 && !isBorrowed
                       ? "#128CFC"
                       : isBorrowed
                       ? "#AF1917"
@@ -513,6 +541,7 @@ const styles = StyleSheet.create({
     marginTop: responsiveHeight(5),
   },
   bookCenterContent: {
+    marginTop: responsiveHeight(1),
     alignItems: "center",
   },
   box: {
@@ -527,12 +556,12 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.5,
-        shadowRadius: 4,
+        shadowRadius: 2,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
     }),
   },

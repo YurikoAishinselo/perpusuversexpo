@@ -111,7 +111,7 @@ function Login({ navigation }) {
             setPasswordText("");
           }
         })
-        .catch((e) => Alert.alert(e))
+        .catch((e) => Alert.alert("Server error!"))
         .finally(() => {
           setPasswordText("");
           setUsernameText("");
@@ -177,7 +177,11 @@ function Login({ navigation }) {
         />
       </View>
       {!isKeyboardOpen && (
-        <TouchableOpacity style={styles.loginButton} onPress={getUserInfo}>
+        <TouchableOpacity
+          style={loading ? styles.loginButtonOnLoading : styles.loginButton}
+          onPress={!loading ? getUserInfo : null}
+          activeOpacity={loading ? 1 : 0}
+        >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       )}
@@ -270,6 +274,14 @@ const styles = StyleSheet.create({
     paddingVertical: responsiveHeight(2),
     paddingHorizontal: responsiveWidth(35),
     backgroundColor: "#128CFC",
+  },
+  loginButtonOnLoading: {
+    position: "absolute",
+    bottom: responsiveHeight(8),
+    borderRadius: 15,
+    paddingVertical: responsiveHeight(2),
+    paddingHorizontal: responsiveWidth(35),
+    backgroundColor: "#808080",
   },
   loginButtonPressed: {
     backgroundColor: "#0d6aad",
