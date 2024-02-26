@@ -79,7 +79,7 @@ function Login({ navigation }) {
           console.log("response status", response.status);
           if (response.status === 200) {
             response.json().then((data) => {
-              console.log("token", data.data.token);
+              console.log("token", data.data.access_token);
               const token = data.data.access_token;
               fetch(apiUrl + "user/get_user_info", {
                 method: "GET",
@@ -100,18 +100,18 @@ function Login({ navigation }) {
                     user_token: token,
                   });
                 })
-                .catch((e) => console.log(e));
+                .catch((e) => Alert.alert(e.message));
             });
           } else if (usernameText === "" || passwordText === "") {
             Alert.alert("Fill in your username or password first");
           } else if (response.status === 401) {
-            Alert.alert("Server error!");
-          } else if (response.status === 402) {
             Alert.alert("Wrong Username or Password");
             setPasswordText("");
+          } else {
+            Alert.alert("Error " + response.status);
           }
         })
-        .catch((e) => Alert.alert("Server error!"))
+        .catch((e) => Alert.alert("Server error! " + e.message))
         .finally(() => {
           setPasswordText("");
           setUsernameText("");
@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   passwordIcon: {
+    paddingVertical: responsiveHeight(0.6),
     marginTop: responsiveHeight(1.1),
     marginBottom: responsiveHeight(1),
     justifyContent: "center",

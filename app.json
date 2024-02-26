@@ -6,21 +6,26 @@
     "orientation": "portrait",
     "icon": "./assets/PublicAsset/appsIcon.png",
     "userInterfaceStyle": "light",
-    "plugins":[
+    "plugins": [
       [
-        "expo-image-picker", {
-          "photosPermission":  "The app accesses your photo to let you share them with your friends"
+        "expo-image-picker",
+        {
+          // "photosPermission": "The app accesses your photo to let you share them with your friends"
         }
       ]
     ],
-    "assetBundlePatterns": ["*/"
+    "assetBundlePatterns": [
+      "*/"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.erwin128.perpusuversexpo"
     },
     "android": {
-      "permissions": ["WRITE_EXTERNAL_STORAGE"],
+      "permissions": [
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/PublicAsset/appsIcon.png",
         "backgroundColor": "#ffffff"
@@ -32,8 +37,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "3e3472e5-864c-4699-b2ec-5cb61ad790bd"
+        "projectId": "b267b043-81ee-422f-91cb-ca29dbdc728e"
       }
-    }
+    },
+    "owner": "yuriko123456"
   }
 }

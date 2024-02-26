@@ -243,32 +243,33 @@ const styles = StyleSheet.create({
   },
 
   changePasswordInputContainer: {
-    marginTop: responsiveHeight(1),
+    marginTop: responsiveHeight(2.5),
     alignItems: "center",
     height: responsiveHeight(80),
   },
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(25),
-    width: responsiveHeight(25),
+    height: responsiveHeight(20),
+    width: responsiveHeight(20),
   },
 
   titleText: {
-    // marginTop: responsiveHeight(3),
+    marginTop: responsiveHeight(3),
     fontSize: responsiveFontSize(4.5),
     fontWeight: "600",
     marginBottom: responsiveHeight(5),
   },
 
   inputBox: {
+    // backgroundColor: "#ff0000",
     marginTop: responsiveHeight(1),
     flexDirection: "row",
     alignItems: "center",
     width: responsiveWidth(85),
     height: responsiveHeight(6),
     justifyContent: "space-between",
-    borderWidth: 1,
+    borderWidth: responsiveHeight(0.1),
     borderColor: "gray",
     borderRadius: responsiveHeight(1.6),
     marginBottom: responsiveHeight(1),
@@ -279,12 +280,12 @@ const styles = StyleSheet.create({
 
   showIcon: {
     width: responsiveHeight(2.4),
-    height: responsiveHeight(1.8),
+    height: responsiveHeight(1.6),
   },
 
   hideIcon: {
     width: responsiveHeight(2.5),
-    height: responsiveHeight(2),
+    height: responsiveHeight(1.6),
   },
 
   passwordIcon: {

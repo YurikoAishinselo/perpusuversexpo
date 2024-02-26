@@ -35,6 +35,8 @@ const BookDetail = ({ route, navigation }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const books = booksData.booksList;
   const [loading, setLoading] = useState(true);
+  // const [isRatingLoading, setIsRatingLoading] = useState(false);
+  const [historyId, setHistoryId] = useState(0);
 
   const { bookIds, user_id, user_token } = route.params;
 
@@ -51,35 +53,33 @@ const BookDetail = ({ route, navigation }) => {
     checkIsBorrowed();
   }, []);
 
-  const fetchInfo = async () => {
+  const fetchInfo = () => {
     {
       try {
-        let result = await fetch(Url);
-        result = await result.json();
-        setBookDetail(result.data.book_lists);
-        setCurrentStock(result.data.book_lists.stock_left);
+        fetch(Url)
+          .then((res) => res.json())
+          .then((result) => {
+            setBookDetail(result.data.book_lists);
+            setCurrentStock(result.data.book_lists.stock_left);
+            const userBooks = result.data.book_lists.borrow.filter(
+              (book) => book.user_id == user_id
+            );
+            if (userBooks.length > 0) {
+              setHistoryId(userBooks.pop().id);
+            }
+            setLoading(false);
+            setSynopsisLineNumberMoreThan4(
+              Synopsis.current.props.numberOfLines > 4 ? true : false
+            );
+          });
       } catch (e) {
-        console.error("error", e);
-      } finally {
-        setLoading(false);
-        setSynopsisLineNumberMoreThan4(
-          Synopsis.current.props.numberOfLines > 4 ? true : false
-        );
+        Alert.alert(e.message);
       }
     }
   };
 
   // Assuming you want to display the first book in your JSON data
   const firstBook = books[0];
-  const {
-    bookAuthor,
-    bookTitle,
-    borrowedBooks,
-    bookStock,
-    bookCategory,
-    bookRating,
-    bookSynopsisContent,
-  } = firstBook;
 
   const checkIsBorrowed = () => {
     const apiUrlBorrowed = apiUrl + "user/get_book_list";
@@ -123,8 +123,15 @@ const BookDetail = ({ route, navigation }) => {
       });
   };
 
-  const handleBorrowNow = () => {
+  const handleBorrowNow = async () => {
     if (!isBorrowed) {
+      const result = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+      if (!(result === "granted")) {
+        Alert.alert(
+          "You need to give permission to media to download the book!"
+        );
+        return;
+      }
       const borrowUrl = apiUrl + "user/borrow_book";
       const params = {
         book_id: bookIds,
@@ -243,6 +250,9 @@ const BookDetail = ({ route, navigation }) => {
       const fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
       const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
       if (!fileInfo.exists) {
+        Alert.alert(
+          "Book not found in your file! Open on your device which you are using when borrowing this book or consider reborrow the book!"
+        );
       } else {
         navigation.navigate("Book", { filePath: bookIds });
       }
@@ -277,12 +287,12 @@ const BookDetail = ({ route, navigation }) => {
 
   // const maxLinesToShow = 4; // Set the maximum number of lines to show
 
-  const downloadFile = async (downloadUrl) => {
+  const downloadFile = async (download_Url) => {
     const fileName = bookIds;
     let fileDownloadPath = FileSystem.documentDirectory + fileName + ".pdf";
     const fileInfo = await FileSystem.getInfoAsync(fileDownloadPath);
     if (!fileInfo.exists) {
-      FileSystem.downloadAsync(downloadUrl, fileDownloadPath)
+      FileSystem.downloadAsync(download_Url, fileDownloadPath)
         .then(({ uri }) => {
           console.log(`Book downloaded successfully in ${uri}`);
         })
@@ -294,6 +304,7 @@ const BookDetail = ({ route, navigation }) => {
           setIsBorrowed(true);
         });
     } else {
+      deleteFile(fileName).then(() => downloadFile(downloadUrl));
     }
   };
 
@@ -313,28 +324,58 @@ const BookDetail = ({ route, navigation }) => {
       .catch((e) => console.error("Error deleting file, " + e));
   };
 
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedStars, setSelectedStars] = useState(5);
+  // const [isModalVisible, setModalVisible] = useState(false);
+  // const [selectedStars, setSelectedStars] = useState(5);
+  // const handleStarPress = (starCount) => {
+  //   // Update the selectedStars state when a star is pressed
+  //   setSelectedStars(starCount);
+  // };
+  // const handleRatingPress = () => {
+  //   // Show the modal when the rating container is pressed
+  //   setModalVisible(true);
+  // };
 
-  const handleStarPress = (starCount) => {
-    // Update the selectedStars state when a star is pressed
-    setSelectedStars(starCount);
-  };
+  // const handleBackdropPress = () => {
+  //   // Auto-close the modal when tapping outside
+  //   setModalVisible(false);
+  // };
+  // let newRating = selectedStars;
 
-  const handleRatingPress = () => {
-    // Show the modal when the rating container is pressed
-    setModalVisible(true);
-  };
+  // const submitRating = () => {
+  //   if (historyId == 0) {
+  //     Alert.alert("You haven't borrowed the book yet! Can't rate the book!");
+  //     setModalVisible(false);
+  //     return;
+  //   }
 
-  const handleBackdropPress = () => {
-    // Auto-close the modal when tapping outside
-    setModalVisible(false);
-  };
-  let newRating = selectedStars;
+  //   setIsRatingLoading(true);
+  //   const ratingParams = {
+  //     history_id: historyId,
+  //     rate: selectedStars,
+  //   };
+  //   const urlSubmitRating = `${apiUrl}book_move/update_rating`;
 
-  const submitRating = () => {
-    setModalVisible(false);
-  };
+  //   fetch(urlSubmitRating, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${user_token}`,
+  //     },
+  //     body: JSON.stringify(ratingParams),
+  //   })
+  //     .then((res) => {
+  //       if (res.ok) {
+  //         Alert.alert("Thank you for rating this book!");
+  //       } else if (res.status == 400) {
+  //         Alert.alert("Error, you have to return the book first!");
+  //       }
+  //     })
+  //     .catch((e) => Alert.alert(e.message))
+  //     .finally(() => {
+  //       setModalVisible(false);
+  //       setIsRatingLoading(false);
+  //     });
+  // };
 
   return (
     <ImageBackground
@@ -369,7 +410,6 @@ const BookDetail = ({ route, navigation }) => {
                 {splitTitleIntoLines(bookDetail.name, 25)}
               </Text>
               <Text style={styles.bookAuthor}>{bookDetail.writer}</Text>
-              <Text style={styles.bookAuthor}>new Rating : {newRating} </Text>
               <Text
                 style={[
                   styles.bookStock,
@@ -386,26 +426,28 @@ const BookDetail = ({ route, navigation }) => {
               onPress={handleRatingPress}
               activeOpacity={0.7}
             >
-              <Text style={styles.ratingMessage}>Book Rating</Text>
+              <Text style={styles.ratingMessage}>Book</Text>
               <View style={styles.starContainer}>
-                {[...Array(bookRating).keys()].map((index) => (
+                {[...Array(parseInt(bookDetail.rate)).keys()].map((index) => (
                   <Image
                     key={index}
                     source={require("../assets/PublicAsset/fillStar.png")}
                     style={styles.starImage}
                   />
                 ))}
-                {[...Array(5 - bookRating).keys()].map((index) => (
-                  <Image
-                    key={index + bookDetail.rating}
-                    source={require("../assets/PublicAsset/blackOutlineStar.png")}
-                    style={styles.starImage}
-                  />
-                ))}
+                {[...Array(5 - parseInt(bookDetail.rate)).keys()].map(
+                  (index) => (
+                    <Image
+                      key={index + bookDetail.rating}
+                      source={require("../assets/PublicAsset/blackOutlineStar.png")}
+                      style={styles.starImage}
+                    />
+                  )
+                )}
               </View>
             </TouchableOpacity>
 
-            <Modal
+            {/* <Modal
               isVisible={isModalVisible}
               animationIn="slideInUp"
               animationOut="slideOutDown"
@@ -438,12 +480,13 @@ const BookDetail = ({ route, navigation }) => {
                   <TouchableOpacity
                     style={styles.submitRatingButton}
                     onPress={submitRating}
+                    disabled={isRatingLoading}
                   >
                     <Text style={styles.submitRatingButtonText}>Submit</Text>
                   </TouchableOpacity>
                 </View>
               </View>
-            </Modal>
+            </Modal> */}
             <Text style={styles.bookSynopsisTitle}>Synopsis</Text>
             <View style={styles.bookSynopsisContentContainer}>
               <Text
@@ -482,7 +525,7 @@ const BookDetail = ({ route, navigation }) => {
                   handleBorrowNow();
                 }
               }}
-              disabled={currentStock === 0 && !isBorrowed}
+              disabled={(currentStock === 0 && !isBorrowed) || isDownloading}
             >
               <Text style={styles.buttonText}>
                 {isBorrowed
@@ -517,7 +560,7 @@ const BookDetail = ({ route, navigation }) => {
               disabled={!isBorrowed && currentStock > 0}
             >
               <Text style={styles.buttonText}>
-                {isBorrowed ? "Return" : "Notify me"}
+                {isBorrowed ? "Return" : "Return"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -677,47 +720,6 @@ const styles = StyleSheet.create({
   },
   emptyArea: {
     height: responsiveHeight(8),
-  },
-  ratingContainer: {
-    // backgroundColor: "#ff0000",
-    // flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  ratingMessage: {
-    textAlign: "left",
-    fontSize: responsiveFontSize(2.3),
-    fontWeight: "bold",
-  },
-  starContainer: {
-    marginTop: responsiveHeight(1),
-    flexDirection: "row",
-  },
-  starImage: {
-    height: responsiveHeight(2),
-    width: responsiveHeight(2),
-    marginRight: responsiveWidth(2),
-  },
-  starImageModal: {
-    height: responsiveHeight(4),
-    width: responsiveHeight(4),
-    marginRight: responsiveWidth(3),
-    // backgroundColor: "#ff0000",
-  },
-  starModalContainer: {
-    flexDirection: "row",
-  },
-  submitRatingButton: {
-    paddingHorizontal: responsiveWidth(10),
-    backgroundColor: "#128CFC",
-    bottom: responsiveHeight(3),
-    position: "absolute",
-    paddingVertical: responsiveHeight(1),
-    borderRadius: responsiveHeight(1),
-  },
-
-  submitRatingButtonText: {
-    color: "#fff",
-    fontSize: responsiveFontSize(2),
   },
 
   whiteContainer: {

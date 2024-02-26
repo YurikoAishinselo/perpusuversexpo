@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(25),
-    width: responsiveHeight(25),
+    height: responsiveHeight(20),
+    width: responsiveHeight(20),
   },
 
   nameText: {

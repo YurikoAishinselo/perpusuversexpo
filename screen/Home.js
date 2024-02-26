@@ -202,12 +202,12 @@ const styles = StyleSheet.create({
     color: "#7C7C7C",
   },
   profileImage: {
-    height: responsiveWidth(20),
-    width: responsiveWidth(20),
-    borderRadius: 50,
+    height: responsiveWidth(15),
+    width: responsiveWidth(15),
+    borderRadius: responsiveHeight(50),
   },
   searchContent: {
-    marginTop: responsiveHeight(2),
+    marginTop: responsiveHeight(0.5),
     height: responsiveHeight(8),
     flexDirection: "row",
     justifyContent: "center",
@@ -220,20 +220,20 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     borderTopRightRadius: 10,
-    borderWidth: responsiveHeight(0.1),
+    borderWidth: responsiveHeight(0.06),
     flexDirection: "row",
     alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#FFFFFF",
-        shadowOffset: { width: 0, height: responsiveHeight(2) },
-        shadowOpacity: 0.5,
-        shadowRadius: responsiveHeight(2),
-      },
-      android: {
-        elevation: responsiveHeight(2),
-      },
-    }),
+    // ...Platform.select({
+    //   ios: {
+    //     shadowColor: "#FFFFFF",
+    //     shadowOffset: { width: 0, height: responsiveHeight(2) },
+    //     shadowOpacity: 0.5,
+    //     shadowRadius: responsiveHeight(2),
+    //   },
+    //   android: {
+    //     elevation: responsiveHeight(1),
+    //   },
+    // }),
   },
   input: {
     flex: 1,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,
-    borderWidth: responsiveWidth(0.05),
+    borderWidth: responsiveWidth(0.08),
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",

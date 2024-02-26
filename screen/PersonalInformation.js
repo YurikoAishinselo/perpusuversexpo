@@ -18,7 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import apiUrl from "../Data/ApiUrl";
 
 const PersonalInformation = ({ navigation, route }) => {
-  let profilFakultas = "";
+  const [profilFakultas, setProfilFakultas] = useState("");
   const [imageSource, setImageSource] = useState(
     "../assets/ProfileAsset/profilImage.jpg"
   );
@@ -41,44 +41,45 @@ const PersonalInformation = ({ navigation, route }) => {
       .then((response) => response.json())
       .then((data) => {
         SetProfile(data.data);
-        console.log("Username", data.data.username[5]);
+        // console.log("Username", data.data.username[5]);
         switch (data.data.username[5]) {
           case "1":
-            profilFakultas = "Seni";
+            setProfilFakultas("Seni");
             break;
-          case 2:
-            profilFakultas = "Bisnis";
+          case "2":
+            setProfilFakultas("Bisnis");
             break;
           case "3":
-            profilFakultas = "Komputer";
+            setProfilFakultas("Komputer");
             break;
-          case 4:
-            profilFakultas = "Teknik";
+          case "4":
+            setProfilFakultas("Teknik");
             break;
-          case 5:
-            profilFakultas = "Pendidikan";
+          case "5":
+            setProfilFakultas("Pendidikan");
             break;
           default:
-            profilFakultas = "Other";
+            setProfilFakultas("Other");
         }
 
         SetIsLoading(false);
+        // console.log("fakultas : " + profilFakultas);
       })
       .catch((e) => console.error(e));
   };
 
-  const uploadPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    }).catch((e) => console.error(e));
+  // const uploadPhoto = async () => {
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   }).catch((e) => console.error(e));
 
-    if (!result.canceled) {
-      setImageSource(result.assets[0].uri);
-    }
-  };
+  //   if (!result.canceled) {
+  //     setImageSource(result.assets[0].uri);
+  //   }
+  // };
 
   return (
     <ImageBackground
@@ -117,10 +118,10 @@ const PersonalInformation = ({ navigation, route }) => {
             <Text style={styles.profileDataText}>{profile.name}</Text>
           </View>
 
-          {/* <View style={styles.profilePersonalInformation}>
+          <View style={styles.profilePersonalInformation}>
             <Text style={styles.profileTitleText}>Fakultas</Text>
             <Text style={styles.profileDataText}>{profilFakultas}</Text>
-          </View> */}
+          </View>
 
           <View style={styles.profilePersonalInformation}>
             <Text style={styles.profileTitleText}>Jurusan</Text>
@@ -148,13 +149,13 @@ const styles = StyleSheet.create({
   },
 
   userProfile: {
-    // marginTop: responsiveHeight(4),
+    marginTop: responsiveHeight(4),
     alignItems: "center",
   },
 
   profileImageContainer: {
     position: "relative",
-    // marginBottom: responsiveHeight(1),
+    marginBottom: responsiveHeight(1),
   },
 
   editIconContainer: {
@@ -175,8 +176,8 @@ const styles = StyleSheet.create({
 
   imageSize: {
     borderRadius: responsiveHeight(30),
-    height: responsiveHeight(25),
-    width: responsiveHeight(25),
+    height: responsiveHeight(20),
+    width: responsiveHeight(20),
   },
 
   nameText: {

@@ -7,6 +7,8 @@ import {
   ImageBackground,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
+  Modal,
 } from "react-native";
 import {
   responsiveHeight,
@@ -23,6 +25,8 @@ const History = ({ route }) => {
   const [history, setHistory] = useState([]);
   const [userHistory, setUserHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(5);
 
   useEffect(() => {
     fetchHistory();
@@ -69,34 +73,48 @@ const History = ({ route }) => {
     });
   };
 
+  const handleRatingPress = () => {
+    // Show the modal when the rating container is pressed
+    setModalVisible(true);
+  };
+
+  const handleBackdropPress = () => {
+    // Auto-close the modal when tapping outside
+    setModalVisible(false);
+  };
+
   const renderBookCard = (book) => {
     return (
-      <View style={styles.bookCard} key={book.bookId}>
-        <View style={styles.bookImagePosition}>
-          <Image
-            source={{ uri: `${imageApiUrl}storage/${book.cover_path}` }}
-            style={styles.bookImage}
-          />
-        </View>
-        <View style={styles.bookInfo}>
-          <Text style={styles.bookTitle}>{book.name}</Text>
-          <Text style={styles.bookAuthor} numberOfLines={2}>
-            {book.author}
-          </Text>
-          <Text style={styles.borrowingDate}>Dipinjam: {book.borrow_date}</Text>
-          <View style={styles.bookRating}>
+      <TouchableOpacity onPress={() => handleRatingPress}>
+        <View style={styles.bookCard} key={book.bookId}>
+          <View style={styles.bookImagePosition}>
             <Image
-              source={require("../assets/myBookAsset/ratingStarImage.png")}
-              style={styles.ratingStar}
+              source={{ uri: `${imageApiUrl}storage/${book.cover_path}` }}
+              style={styles.bookImage}
             />
-            <View>
-              <Text style={styles.ratingText}>
-                {book.rate === null ? "Tidak dinilai" : book.rate}
-              </Text>
+          </View>
+          <View style={styles.bookInfo}>
+            <Text style={styles.bookTitle}>{book.name}</Text>
+            <Text style={styles.bookAuthor} numberOfLines={2}>
+              {book.author}
+            </Text>
+            <Text style={styles.borrowingDate}>
+              Dipinjam: {book.borrow_date}
+            </Text>
+            <View style={styles.bookRating}>
+              <Image
+                source={require("../assets/myBookAsset/ratingStarImage.png")}
+                style={styles.ratingStar}
+              />
+              <View>
+                <Text style={styles.ratingText}>
+                  {book.rate === null ? "Tidak dinilai" : book.rate}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -117,6 +135,42 @@ const History = ({ route }) => {
             )}
           </View>
           <View style={styles.emptyArea}></View>
+          <Modal
+            isVisible={isModalVisible}
+            animationIn="slideInUp"
+            animationOut="slideOutDown"
+            onBackdropPress={handleBackdropPress}
+          >
+            <View style={styles.ratingModalContainer}>
+              <View style={styles.whiteContainer}>
+                <Text style={styles.ratingModalTitle}>Rate this Book</Text>
+                <View style={styles.starModalContainer}>
+                  {[1, 2, 3, 4, 5].map((starCount) => (
+                    <TouchableOpacity
+                      key={starCount}
+                      onPress={() => handleStarPress(starCount)}
+                    >
+                      <Image
+                        source={require("../assets/PublicAsset/filledStar.png")}
+                        style={[
+                          styles.starImageModal,
+                          {
+                            tintColor:
+                              starCount <= selectedStars
+                                ? "#FFD700"
+                                : "#D3D3D3",
+                          },
+                        ]}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TouchableOpacity style={styles.submitRatingButton}>
+                  <Text style={styles.submitRatingButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </ScrollView>
       )}
     </ImageBackground>
