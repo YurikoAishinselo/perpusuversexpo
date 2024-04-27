@@ -11,6 +11,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  PermissionsAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import {
@@ -125,13 +126,6 @@ const BookDetail = ({ route, navigation }) => {
 
   const handleBorrowNow = async () => {
     if (!isBorrowed) {
-      const result = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
-      if (!(result === "granted")) {
-        Alert.alert(
-          "You need to give permission to media to download the book!"
-        );
-        return;
-      }
       const borrowUrl = apiUrl + "user/borrow_book";
       const params = {
         book_id: bookIds,
@@ -324,58 +318,58 @@ const BookDetail = ({ route, navigation }) => {
       .catch((e) => console.error("Error deleting file, " + e));
   };
 
-  // const [isModalVisible, setModalVisible] = useState(false);
-  // const [selectedStars, setSelectedStars] = useState(5);
-  // const handleStarPress = (starCount) => {
-  //   // Update the selectedStars state when a star is pressed
-  //   setSelectedStars(starCount);
-  // };
-  // const handleRatingPress = () => {
-  //   // Show the modal when the rating container is pressed
-  //   setModalVisible(true);
-  // };
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedStars, setSelectedStars] = useState(5);
+  const handleStarPress = (starCount) => {
+    // Update the selectedStars state when a star is pressed
+    setSelectedStars(starCount);
+  };
+  const handleRatingPress = () => {
+    // Show the modal when the rating container is pressed
+    setModalVisible(true);
+  };
 
-  // const handleBackdropPress = () => {
-  //   // Auto-close the modal when tapping outside
-  //   setModalVisible(false);
-  // };
-  // let newRating = selectedStars;
+  const handleBackdropPress = () => {
+    // Auto-close the modal when tapping outside
+    setModalVisible(false);
+  };
+  let newRating = selectedStars;
 
-  // const submitRating = () => {
-  //   if (historyId == 0) {
-  //     Alert.alert("You haven't borrowed the book yet! Can't rate the book!");
-  //     setModalVisible(false);
-  //     return;
-  //   }
+  const submitRating = () => {
+    if (historyId == 0) {
+      Alert.alert("You haven't borrowed the book yet! Can't rate the book!");
+      setModalVisible(false);
+      return;
+    }
 
-  //   setIsRatingLoading(true);
-  //   const ratingParams = {
-  //     history_id: historyId,
-  //     rate: selectedStars,
-  //   };
-  //   const urlSubmitRating = `${apiUrl}book_move/update_rating`;
+    setIsRatingLoading(true);
+    const ratingParams = {
+      history_id: historyId,
+      rate: selectedStars,
+    };
+    const urlSubmitRating = `${apiUrl}book_move/update_rating`;
 
-  //   fetch(urlSubmitRating, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${user_token}`,
-  //     },
-  //     body: JSON.stringify(ratingParams),
-  //   })
-  //     .then((res) => {
-  //       if (res.ok) {
-  //         Alert.alert("Thank you for rating this book!");
-  //       } else if (res.status == 400) {
-  //         Alert.alert("Error, you have to return the book first!");
-  //       }
-  //     })
-  //     .catch((e) => Alert.alert(e.message))
-  //     .finally(() => {
-  //       setModalVisible(false);
-  //       setIsRatingLoading(false);
-  //     });
-  // };
+    fetch(urlSubmitRating, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user_token}`,
+      },
+      body: JSON.stringify(ratingParams),
+    })
+      .then((res) => {
+        if (res.ok) {
+          Alert.alert("Thank you for rating this book!");
+        } else if (res.status == 400) {
+          Alert.alert("Error, you have to return the book first!");
+        }
+      })
+      .catch((e) => Alert.alert(e.message))
+      .finally(() => {
+        setModalVisible(false);
+        setIsRatingLoading(false);
+      });
+  };
 
   return (
     <ImageBackground
@@ -733,6 +727,24 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     position: "absolute",
     top: responsiveHeight(3),
+  },
+  starContainer: {
+    marginTop: responsiveHeight(1),
+    flexDirection: "row",
+  },
+  starImage: {
+    height: responsiveHeight(2),
+    width: responsiveHeight(2),
+    marginRight: responsiveWidth(2),
+  },
+  starImageModal: {
+    height: responsiveHeight(4),
+    width: responsiveHeight(4),
+    marginRight: responsiveWidth(3),
+    // backgroundColor: "#ff0000",
+  },
+  starModalContainer: {
+    flexDirection: "row",
   },
 });
 

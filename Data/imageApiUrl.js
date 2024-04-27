@@ -1,3 +1,3 @@
-const imageApiUrl = "http://cidia.my.id/";
+const imageApiUrl = "http://lib.uvers.ac.id/";
 
 export default imageApiUrl;

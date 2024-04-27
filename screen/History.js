@@ -85,7 +85,10 @@ const History = ({ route }) => {
 
   const renderBookCard = (book) => {
     return (
-      <TouchableOpacity onPress={() => handleRatingPress}>
+      <TouchableOpacity
+        style={styles.ratingContainer}
+        onPress={handleRatingPress}
+      >
         <View style={styles.bookCard} key={book.bookId}>
           <View style={styles.bookImagePosition}>
             <Image
@@ -135,42 +138,41 @@ const History = ({ route }) => {
             )}
           </View>
           <View style={styles.emptyArea}></View>
-          <Modal
+          {/* <Modal
             isVisible={isModalVisible}
             animationIn="slideInUp"
             animationOut="slideOutDown"
             onBackdropPress={handleBackdropPress}
           >
-            <View style={styles.ratingModalContainer}>
-              <View style={styles.whiteContainer}>
-                <Text style={styles.ratingModalTitle}>Rate this Book</Text>
-                <View style={styles.starModalContainer}>
-                  {[1, 2, 3, 4, 5].map((starCount) => (
-                    <TouchableOpacity
-                      key={starCount}
-                      onPress={() => handleStarPress(starCount)}
-                    >
-                      <Image
-                        source={require("../assets/PublicAsset/filledStar.png")}
-                        style={[
-                          styles.starImageModal,
-                          {
-                            tintColor:
-                              starCount <= selectedStars
-                                ? "#FFD700"
-                                : "#D3D3D3",
-                          },
-                        ]}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <TouchableOpacity style={styles.submitRatingButton}>
-                  <Text style={styles.submitRatingButtonText}>Submit</Text>
-                </TouchableOpacity>
+          {print("Modal active")}
+          <View style={styles.ratingModalContainer}>
+            <View style={styles.whiteContainer}>
+              <Text style={styles.ratingModalTitle}>Rate this Book</Text>
+              <View style={styles.starModalContainer}>
+                {[1, 2, 3, 4, 5].map((starCount) => (
+                  <TouchableOpacity
+                    key={starCount}
+                    onPress={() => handleStarPress(starCount)}
+                  >
+                    <Image
+                      source={require("../assets/PublicAsset/filledStar.png")}
+                      style={[
+                        styles.starImageModal,
+                        {
+                          tintColor:
+                            starCount <= selectedStars ? "#FFD700" : "#D3D3D3",
+                        },
+                      ]}
+                    />
+                  </TouchableOpacity>
+                ))}
               </View>
+              <TouchableOpacity style={styles.submitRatingButton}>
+                <Text style={styles.submitRatingButtonText}>Submit</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
+          </View>
+          </Modal> */}
         </ScrollView>
       )}
     </ImageBackground>
@@ -255,6 +257,51 @@ const styles = StyleSheet.create({
   },
   emptyArea: {
     height: responsiveHeight(5),
+  },
+
+  ratingModalTitle: {
+    fontSize: responsiveFontSize(3.5),
+    fontWeight: "bold",
+    position: "absolute",
+    top: responsiveHeight(3),
+  },
+  starContainer: {
+    marginTop: responsiveHeight(1),
+    flexDirection: "row",
+  },
+  starImage: {
+    height: responsiveHeight(2),
+    width: responsiveHeight(2),
+    marginRight: responsiveWidth(2),
+  },
+  starImageModal: {
+    height: responsiveHeight(4),
+    width: responsiveHeight(4),
+    marginRight: responsiveWidth(3),
+    // backgroundColor: "#ff0000",
+  },
+  starModalContainer: {
+    flexDirection: "row",
+  },
+
+  submitRatingButton: {
+    paddingHorizontal: responsiveWidth(10),
+    backgroundColor: "#128CFC",
+    bottom: responsiveHeight(3),
+    position: "absolute",
+    paddingVertical: responsiveHeight(1),
+    borderRadius: responsiveHeight(1),
+  },
+
+  submitRatingButtonText: {
+    color: "#fff",
+    fontSize: responsiveFontSize(2),
+  },
+
+  ratingContainer: {
+    // backgroundColor: "#ff0000",
+    // flexDirection: "row",
+    alignItems: "flex-start",
   },
 });
 

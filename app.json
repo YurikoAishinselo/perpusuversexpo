@@ -10,7 +10,7 @@
       [
         "expo-image-picker",
         {
-          // "photosPermission": "The app accesses your photo to let you share them with your friends"
+          "photosPermission": "The app accesses your photo to let you share them with your friends"
         }
       ]
     ],
@@ -37,9 +37,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "b267b043-81ee-422f-91cb-ca29dbdc728e"
+        "projectId": "3e3472e5-864c-4699-b2ec-5cb61ad790bd"
       }
     },
-    "owner": "yuriko123456"
+    "owner": "erwin128"
   }
 }
